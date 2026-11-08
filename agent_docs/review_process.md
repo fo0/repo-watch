@@ -170,11 +170,11 @@ Summary: X categories checked | Y fixed | Z deferred → Backlog | N dropped at 
 
 After all review fixes are applied, re-read the full implementation one more time:
 
-| Check                      | What to look for                                                                                   |
-| -------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Regressions**            | Did a fix break existing behavior? Changed return values, removed fallbacks, altered control flow? |
-| **Unnecessary complexity** | Did the implementation add indirection or branching that isn't needed?                             |
-| **Consistency**            | Do the changes fit the patterns in surrounding code?                                               |
+| Check                      | What to look for                                                                                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Regressions**            | Did a fix break existing behavior? Changed return values, removed fallbacks, altered control flow?                                                                            |
+| **Unnecessary complexity** | Did the implementation add indirection or branching that isn't needed?                                                                                                        |
+| **Consistency**            | Do the changes fit the surrounding code only where it keeps the documented rules and the owner's latest request? A pattern that breaks them is a finding, never one to match. |
 
 Rules:
 
@@ -183,7 +183,7 @@ Rules:
 
 ## UI Review (only when UI code changed)
 
-**First the owner UX rules** (`agent_docs/ux_rules.md`, binding) — check every changed screen against each item; a violation is at least P1:
+**The owner's rules first.** `agent_docs/ux_rules.md` (binding, #18) and the _UI rules_ of `.claude/skills/ui-mockup/SKILL.md` are the house decisions every changed screen is checked against, one rule at a time (precedence between the two: the skill's _UI rules_). A violation is at least P1, and so is a doc the change contradicts without correcting it, or an Accepted ADR it contradicts that no owner request in chat superseded — the fix keeps the ADR and proposes the superseding one (`agent_docs/adr_template.md → Lifecycle`). The `agent_docs/ux_rules.md` items:
 
 - [ ] Compact: single-line rows, no new cards, decorative headings, badges or step lists
 - [ ] Text: labels only, at most one short help line per form, no paragraph, nothing that narrates the obvious; details in tooltips
@@ -191,20 +191,20 @@ Rules:
 - [ ] Nothing configured by hand that the app can infer; repositories stay automatic
 - [ ] Settings staged behind „Speichern“ / „Abbrechen“; one primary action bottom right per form; a finished flow closes or returns by itself
 - [ ] Success notices close after 3 s; only warnings and errors persist
-- [ ] Toggles keep their spot (maximize ↔ minimize)
+- [ ] Toggles keep their spot (maximize turns into a back arrow at the same spot)
 - [ ] Updates install in the app; no web page as the update path
 - [ ] Screenshots or previews come from the exact build being delivered, never a mock-up
-- [ ] A doc or ADR that contradicts the change is superseded in the same change
+- [ ] A doc that contradicts the change is corrected in the same change; an ADR is superseded only when an owner request in chat contradicts it (rule 11)
 
-**Then three axes:** **accessibility** (names, keyboard, focus, contrast — added invisibly, never as visible prose) → **responsiveness** (360–480 px) → **consistency with existing patterns that comply with the owner UX rules** (a pattern that violates them is no precedent). Findings take the severity the definitions above give them (an unreachable control is a bug, not a nit).
+**Then two axes, in this order:** **accessibility** (names, keyboard, focus, contrast), which adds no visible prose — the detail goes into accessible names and tooltips, visible text never grows for it — then **responsiveness** (360–480 px). Apply current standards for both; findings take the severity the definitions above give them (an unreachable control is a bug, not a nit). An existing screen is precedent only where it keeps the house rules; one that breaks them is a finding, never a pattern to match.
 
 ## Subagent Delegation
 
-**Delegation is the default for long, context-heavy and parallel work** — orchestrator mode is on from session start (`CLAUDE.md → Subagents`, contract in `.claude/skills/orca/SKILL.md`), so that work goes to subagents at width 5, while short units stay with the orchestrator (the skill's contract, item 1). Where the surface allows it, **run them asynchronously and keep working** — spawn-and-block gives up most of the benefit — and step in when one goes off track or is missing context it cannot discover.
+**Delegation is the default for work that waits long, reads raw material in bulk or implements across files** — orchestrator mode is on from session start (`CLAUDE.md → Subagents`, contract in `.claude/skills/orca/SKILL.md`), so that work goes to subagents at width 5, while short units stay with the orchestrator (the skill's contract, item 1). Where the surface allows it, **run them asynchronously and keep working** — spawn-and-block gives up most of the benefit — and step in when one goes off track or is missing context it cannot discover.
 
 **The review itself is delegated, and to a different agent than wrote the code.** A fresh-context reviewer reads the diff without holding the author's intent, which is why it finds what self-critique does not; the author re-reading its own work verifies what it meant, not what it wrote. Where a change can fail in more than one way, seat _distinct_ lenses from the roster (`architect`, `domain`, `security`, `docs`) rather than a second reviewer with the same one — agreement between identical lenses is not evidence of correctness. The orchestrator still owns the process: it reads the returned diffs, decides what the findings mean, and holds the commit gate.
 
-**The role carries the lens.** The roster and the seat criterion per role are canonical in `CLAUDE.md → Subagents` (the wave report names the role, so the vocabulary is closed there); this table says what each lens looks at. A role is _how the assignment is framed_, not a separate mechanism: it goes to a `general-purpose` subagent whose brief names the lens, the standard it answers to, and what its return must contain:
+**The role carries the lens.** The roster and the seat criterion per role are canonical in `CLAUDE.md → Subagents` (the wave report names the role, so the vocabulary is closed there); this table says what each lens looks at. A role is _how the assignment is framed_, not a separate mechanism: it goes to the Opus seat its weight calls for, whose brief names the lens, the standard it answers to, and what its return must contain:
 
 | Role          | Lens it applies                                                                         |
 | ------------- | --------------------------------------------------------------------------------------- |
@@ -216,29 +216,16 @@ Rules:
 | `docs`        | What a reader needs that the diff does not say                                          |
 | `security`    | Trust boundaries, untrusted input, secrets → `.claude/skills/basic-sec-review/SKILL.md` |
 
-Roles are lenses, not a standing panel: a typo fix needs `implementer` and `reviewer`, a new integration may need five. Repo-local roles go in `.claude/agents/*.md` only for a role _this_ repo seats often enough to be worth a file; role-framed assignments cover the rest and cannot drift out of date.
+Roles are lenses, not a standing panel: a typo fix needs `implementer` and `reviewer`, a new integration may need five. Repo-local roles go in `.claude/agents/*.md` only for a role _this_ repo seats often enough to be worth a file, and only fixed at `model: opus` and `effort: high` or above; role-framed assignments cover the rest and cannot drift out of date.
 
-**The type carries the tool access:**
-
-| Task                                                             | Matching `subagent_type`                                                     |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **Locate code / find symbols**                                   | `Explore` (read-only, fast, doesn't pollute main context)                    |
-| **Design an approach before building**                           | `Plan`                                                                       |
-| **Write tests · doc updates · refactoring chunks · boilerplate** | `general-purpose`                                                            |
-| **Independent code review** (second opinion on a diff)           | `general-purpose`, or a project-specific reviewer subagent if one is defined |
-| **Q about Claude Code / SDK / API**                              | `claude-code-guide`                                                          |
-
-**The work carries the model, not the type:** a unit that judges code inherits the session's model; a mechanical one — search, git status, CI watching, log reading — keeps the model at a lower effort, `sonnet` only for a trivial lookup (the skill's contract, item 4).
+**The seat carries the effort.** The `subagent_type` is one of the four seats in `.claude/agents/` — `opus-high`, `opus-xhigh`, `opus-max`, `opus-medium` — and each seat's `description` says which work it takes; the policy behind them (floor, the one seat below it, the types that never run) is the skill's contract, item 4.
 
 ## Subagent Selection Rules
 
-- **Use `Explore` for read-only search.** Specify breadth: `quick` (single targeted), `medium` (moderate), `very thorough` (multiple locations). Do NOT use for code review or open-ended analysis — it reads excerpts, will miss content past its window.
-- **Use `Plan` before non-trivial implementation.** Then hand the plan to `general-purpose` for execution — acting on it in the main thread is plain behavior, for `/orca off` only.
-- **Use `general-purpose` for write+execute** tasks. Default for "do this work" delegations.
-- **Use `claude-code-guide` for tooling questions** about Claude Code itself (slash commands, hooks, MCP servers, SDK).
+- **Classify before every spawn, in doubt `opus-high`** — each seat's description names the work it takes. A plan before non-trivial implementation is `opus-xhigh` work, and the plan then goes to `opus-high` for execution — acting on it in the main thread is plain behavior, for `/orca off` only.
 - **Parallelize independent work** — multiple Agent calls in one message when no dependencies exist.
-- **In orchestrator mode, reading broadly is task work.** A search across the tree, long logs or many files go to a subagent; a known file read for a short unit (the skill's contract, item 1) and the _verification_ reads — `git status`, `git diff`, reading a returned change — are the orchestrator's own. `/orca off` restores plain behavior.
-- **Pass full context** — subagents have no conversation history. Include file paths, line numbers, what was already tried, and the goal.
+- **In orchestrator mode, raw material in bulk is task work.** Long logs, transcripts or many files go to a subagent; a short search, a known file read for a short unit (the skill's contract, item 1) and the _verification_ reads — `git status`, `git diff`, reading a returned change — are the orchestrator's own. `/orca off` restores plain behavior.
+- **Pass full context** — subagents have no conversation history. Include the goal, file paths, line numbers, the known facts, what was already tried, and the return format (the skill's contract, item 7).
 - **Trust but verify** — a subagent's summary describes intent, not necessarily the actual change. Inspect diffs after write-capable subagents finish.
 
 The main agent retains responsibility for the review process itself.
@@ -255,4 +242,4 @@ Only commit when:
 - [ ] Commit message follows project's Git Conventions
 - [ ] UI review done (if UI changed)
 
-<!-- Generated by claude-code-optimizer v1.70.0 -->
+<!-- Generated by claude-code-optimizer v1.74.1 -->

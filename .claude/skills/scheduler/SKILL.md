@@ -46,7 +46,7 @@ subscription. Reach for an interval only when nothing pushes the state at you �
   `/schedule update`, `/schedule run` manage them. `/schedule update` is also the only way to set a custom cron expression.
 - **Inside a Claude Code web / cloud session, routine runs included:** `/schedule` is **not available** — do not report it
   as broken. Routine management runs through the Claude Code Remote MCP tools instead: `list_triggers`, `create_trigger`,
-  `update_trigger`, `delete_trigger`, `fire_trigger`, and `send_later` for a one-shot self check-in. they are pre-approved in
+  `update_trigger`, `delete_trigger`, `fire_trigger`, and `send_later` for a one-shot self check-in. They are pre-approved in
   `.claude/settings.json`, which the local CLI honors once the workspace is trusted; a web/cloud session drops that block
   (no trust dialog exists there), so a permission prompt on this surface is expected until the one-time user-scope fix in
   `agent_docs/mcp_catalog.md → Prompt-free triggers everywhere` is in place — report it as that, not as a broken server.
