@@ -2,15 +2,15 @@
 
 ## Session Start — Read Order
 
-`MEMORY.md` → `SCRATCHPAD.md`; `BACKLOG.md` only when prior findings come up; skip what is missing. `agent_docs/*` and skills load on demand, never up front.
+`MEMORY.md` → `SCRATCHPAD.md`; `BACKLOG.md` only when prior findings come up; skip what is missing. `agent_docs/*` and skills load on demand, never up front. Never suggest `/clear` or `/compact` — the user runs them; keep the state in `SCRATCHPAD.md`, `BACKLOG.md` or `MEMORY.md` as you go.
 
 ## Workflow Triggers
 
-Skills (`.claude/skills/<name>/SKILL.md`): `done` ("done" / "fertig") · `pr` · `basic-review` · `basic-sec-review` · `rollback` · `ci` · `stuck` · `scheduler` (bare `/loop`: `.claude/loop.md`) · `orca` (`/orca <objective>`). Diagram → `agent_docs/diagram_prompt.md`. Findings → `BACKLOG.md`, knowledge → `MEMORY.md` / `SCRATCHPAD.md` (`agent_docs/backlog_process.md`, `memory_process.md`).
+Skills (`.claude/skills/<name>/SKILL.md`): `done` ("done" / "fertig") · `pr` · `basic-review` · `basic-sec-review` · `rollback` · `ci` · `stuck` · `scheduler` (bare `/loop`: `.claude/loop.md`) · `orca` (`/orca <objective>`) · `ui-mockup` (views, mockups, UI rules). Diagram → `agent_docs/diagram_prompt.md`. Findings → `BACKLOG.md`, knowledge → `MEMORY.md` / `SCRATCHPAD.md` (`agent_docs/backlog_process.md`, `memory_process.md`).
 
 ## Output Languages
 
-Chat to the user: the user's language (default German) — skill report shapes fix the structure, not the language — technical terms English and never translated. **Everything else English** — code, comments, commits (Conventional Commits), PRs, issues, every generated file. Term list: `agent_docs/autonomy.md → Never-translate term list`.
+Chat to the user: the user's language (default German) — skill report shapes fix the structure, not the language — technical terms English, never translated. **Everything else English** — code, comments, commits (Conventional Commits), PRs, issues, every generated file. Term list: `agent_docs/autonomy.md → Never-translate term list`.
 
 ## Performance / Modes
 
@@ -53,7 +53,7 @@ A turn that hands a decision back or names a next step / recommendation ends wit
 
 ## Subagents — orchestrator mode is the default
 
-**Every session starts in orchestrator mode, width 5:** the main agent decomposes, does units of about five tool calls and one file, verifies returned diffs, runs the gates and reports; long, context-heavy or parallel work goes to subagents. Code-judging seats inherit the session's model and effort; search, git status, CI, log reads keep the model at lower effort — `sonnet` only for a trivial lookup, effort `low`/`medium`, `high` at most. `/orca <N>` sets the width, `/orca off` drops to plain behavior for this session; `/orca <objective>` / `/orca <N> <objective>` runs an objective. Seat only what the change calls for:
+**Every session starts in orchestrator mode, width 5:** the main agent decomposes, does units of about five tool calls and one file, verifies returned diffs, runs the gates and relays results, never blocking the chat; only work that waits long, reads raw material in bulk or implements across files goes to subagents. Every subagent is an Opus seat from `.claude/agents/`: `opus-high` the default and floor, `opus-xhigh` / `opus-max` for heavy work, `opus-medium` only to watch a pipeline — never `general-purpose`, `Explore`, `Plan`, a fork, or a `model` / `effort` on the call (no seat listed: skill item 4). `/orca <N>` (1–10) sets the width, `/orca off` drops to plain behavior for this session; `/orca <objective>` / `/orca <N> <objective>` runs an objective. Seat only what the change calls for:
 
 | Role          | Earns a seat when                                   |
 | ------------- | --------------------------------------------------- |
@@ -65,7 +65,7 @@ A turn that hands a decision back or names a next step / recommendation ends wit
 | `docs`        | a documented interface or contract changes          |
 | `security`    | trust boundaries, untrusted input, secrets          |
 
-Contract: `.claude/skills/orca/SKILL.md`; type table: `agent_docs/review_process.md → Subagent Delegation`.
+Contract: `.claude/skills/orca/SKILL.md`.
 
 ## Tech Stack
 
@@ -82,7 +82,7 @@ Windows tray companion for GitHub Actions: watch runs, launch `workflow_dispatch
 
 ## Commands
 
-From this project's own configuration, in the one order `install → format-check → lint → typecheck → build → test`; missing stages drop out. `pnpm verify` = lint · icons:check · check · test · release:test · build.
+From this project's configuration, in the one order `install → format-check → lint → typecheck → build → test`; missing stages drop out. `pnpm verify` = lint · icons:check · check · test · release:test · build.
 
 ```bash
 pnpm install --frozen-lockfile   # install
@@ -123,7 +123,7 @@ cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features -
 - **Branches:** feature branch → `main` · **Commits:** Conventional Commits; issues as `#42` · **Merge:** merge commit
 - **Cloud / routine runs** start on `claude/<topic>` unless the task names a branch (`agent_docs/autonomy.md → Branch rule`).
 - **Issues:** work off the default branch starts from an issue — an open one with the same goal, else a new one; routine runs and a task naming its issue keep their own. Commits, PR (`Closes #n`), a branch you name and chat reference it (`agent_docs/autonomy.md → Issue-based work`).
-- **Dependencies:** new runtime dependencies only after user approval with reasoning, dev / tooling ones without; always commit `pnpm-lock.yaml` and `src-tauri/Cargo.lock`.
+- **Dependencies:** new runtime ones only after user approval with reasoning, dev / tooling ones without; always commit `pnpm-lock.yaml` and `src-tauri/Cargo.lock`.
 - **Formatting guard:** staged files auto-format on commit (`agent_docs/ci_formatting_guard.md`); never `--no-verify`.
 
 ## Environment Variables
@@ -148,7 +148,7 @@ Catalog, unattended reach, prompt-free trigger tools: `agent_docs/mcp_catalog.md
 
 ## Architecture Decisions
 
-ADRs in `docs/adr/`: grep them before contradicting one; reverse one only by superseding it — an owner request is reason enough (`agent_docs/adr_template.md → Lifecycle`).
+ADRs in `docs/adr/`: grep them before contradicting one; reverse one only by superseding it — only an owner request in chat suffices (`agent_docs/adr_template.md → Lifecycle`).
 
 ## Documentation Rules
 
@@ -158,4 +158,4 @@ After a code change, update only what it changed: `README.md` · `BACKLOG.md` ·
 
 `CLAUDE.md` loads every turn: **12k** target, offload at **14k**, hard 16k. `MEMORY.md` / `SCRATCHPAD.md` load at session start: 8k / 4k target, offload at 16k / 8k. Over → **move** content out and leave a one-line pointer, never delete to fit — ladder: `agent_docs/context_budget.md`.
 
-<!-- Generated by claude-code-optimizer v1.70.0 -->
+<!-- Generated by claude-code-optimizer v1.74.1 -->
