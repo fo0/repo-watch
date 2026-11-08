@@ -183,7 +183,7 @@ Rules:
 
 ## UI Review (only when UI code changed)
 
-**The owner's rules first.** `agent_docs/ux_rules.md` (binding, #18) and the _UI rules_ of `.claude/skills/ui-mockup/SKILL.md` are the house decisions every changed screen is checked against, one rule at a time; where the two differ, `agent_docs/ux_rules.md` wins. A violation is at least P1, and so is a doc the change contradicts without correcting it, or an Accepted ADR it contradicts that no owner request in chat superseded — the fix keeps the ADR and proposes the superseding one (`agent_docs/adr_template.md → Lifecycle`). The `agent_docs/ux_rules.md` items:
+**The owner's rules first.** `agent_docs/ux_rules.md` (binding, #18) and the _UI rules_ of `.claude/skills/ui-mockup/SKILL.md` are the house decisions every changed screen is checked against, one rule at a time (precedence between the two: the skill's _UI rules_). A violation is at least P1, and so is a doc the change contradicts without correcting it, or an Accepted ADR it contradicts that no owner request in chat superseded — the fix keeps the ADR and proposes the superseding one (`agent_docs/adr_template.md → Lifecycle`). The `agent_docs/ux_rules.md` items:
 
 - [ ] Compact: single-line rows, no new cards, decorative headings, badges or step lists
 - [ ] Text: labels only, at most one short help line per form, no paragraph, nothing that narrates the obvious; details in tooltips
