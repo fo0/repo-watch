@@ -58,7 +58,7 @@ The standard Windows x64 NSIS installer is **unsigned** and can be built and rel
 Prerequisites:
 
 - **Node.js 24**, as pinned in `.node-version` (and `engines` in `package.json`), and **pnpm 11.19.0** (`packageManager` in `package.json`).
-- A current stable **Rust** toolchain.
+- The **Rust** toolchain pinned in `rust-toolchain.toml` (1.99.1 with clippy and rustfmt); rustup installs it on first use.
 - The [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/). On Windows, install Microsoft C++ Build Tools with **Desktop development with C++**, use the MSVC Rust toolchain and provide the WebView2 runtime. Linux/macOS need their corresponding native development dependencies.
 
 From the repository root:
@@ -91,7 +91,7 @@ Open **http://127.0.0.1:1420**. This preview uses labelled synthetic accounts an
 
 [CI](.github/workflows/ci.yml) runs on pull requests: frontend, browser interactions, reproducible icons, Rust formatting/tests/Clippy and Windows desktop Clippy with Win32 popup/window-ownership and isolated autostart-registry tests. Pull requests skip the Rust and Windows jobs when they touch nothing those jobs check. A failed browser test run uploads the Playwright report as an artifact. [Release](.github/workflows/release.yml) is started by hand on `main`: the full CI for that commit, then the unsigned Windows EXE with a generated changelog on the [Releases page](https://github.com/fo0/repo-watch/releases).
 
-[Release](.github/workflows/release.yml) handles explicitly requested unsigned Windows EXE releases with generated versions and changelogs. No additional signing key is required; see the release documentation. The release badge above follows manual runs on `main`; the checks badge follows main pushes. See [release documentation](docs/RELEASES.md) for the exact triggers and publishing process.
+[Release](.github/workflows/release.yml) handles explicitly requested unsigned Windows EXE releases with generated versions and changelogs. No additional signing key is required; see the release documentation. Both badges above follow the manual release runs on `main`; CI runs on pull requests and inside each release run. See [release documentation](docs/RELEASES.md) for the exact triggers and publishing process.
 
 Local verification:
 
