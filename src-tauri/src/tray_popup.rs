@@ -261,6 +261,13 @@ pub fn window_event(window: &tauri::Window, event: &WindowEvent) {
     match event {
         #[cfg(windows)]
         WindowEvent::Resized(_) => {
+            // Aero Snap / Win+Up can still maximize the popup despite
+            // `maximizable: false`: refuse it before the lock below is taken, as
+            // the restore may re-enter this handler with the restored frame.
+            if window.is_maximized().unwrap_or(false) {
+                let _ = window.unmaximize();
+                return;
+            }
             // Read the current frame, not a queued pre-DPI resize event. Preserve
             // the user's preferred logical size across temporary work-area caps.
             if let (Ok(size), Ok(scale)) = (window.outer_size(), window.scale_factor()) {
@@ -269,6 +276,7 @@ pub fn window_event(window: &tauri::Window, event: &WindowEvent) {
                     if state.applied_size.is_some_and(|applied| applied != actual)
                         && window.is_visible().unwrap_or(false)
                         && !window.is_minimized().unwrap_or(false)
+                        && !window.is_maximized().unwrap_or(true)
                     {
                         state.preferred_size = Some((
                             f64::from(size.width) / scale,
