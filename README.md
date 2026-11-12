@@ -68,6 +68,8 @@ pnpm install --frozen-lockfile
 pnpm desktop:dev
 ```
 
+No environment variables or `.env` file are needed to build, test or run RepoWatch. The optional compile-time variables (browser sign-in Client ID and app slug, signed-updater public key) are described in [browser authentication](docs/BROWSER_AUTH.md) and [release and update behavior](docs/RELEASES.md); the full list is in [`agent_docs/env-vars.md`](agent_docs/env-vars.md).
+
 To build the unsigned installer **on Windows**:
 
 ```sh
