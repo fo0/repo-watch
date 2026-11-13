@@ -231,8 +231,9 @@
                     (pin
                       ? m().repos.list.removeFavoriteTitle(pin.label)
                       : m().repos.list.saveFavoriteTitle))}
-                disabled={!can.canRemove || unavailable}
-                onclick={() => onfavorite(workflow)}
+                disabled={unavailable}
+                aria-disabled={can.canRemove ? undefined : 'true'}
+                onclick={() => can.canRemove && onfavorite(workflow)}
               >
                 <Icon name="heart" size={17} />
               </button>
