@@ -50,9 +50,11 @@
       </p>{/if}
     {#if autostart.loaded && !autostart.editable}
       <div class="startup-actions">
+        <!-- The read and the removal turn their own button off via
+             aria-disabled, so a keyboard press keeps focus there. -->
         <button
           class="secondary-button"
-          disabled={autostart.busy}
+          aria-disabled={autostart.busy ? 'true' : undefined}
           onclick={autostart.read}
           ><Icon name="refresh" size={14} />{m().settings.startup
             .checkStatus}</button
@@ -66,8 +68,8 @@
           >
           {#if autostart.current?.registered}<button
               class="text-button"
-              disabled={autostart.busy}
-              onclick={autostart.remove}
+              aria-disabled={autostart.busy ? 'true' : undefined}
+              onclick={() => !autostart.busy && autostart.remove()}
               >{m().settings.startup.removeEntry}</button
             >{/if}
         {/if}

@@ -77,11 +77,13 @@
     /><span>{notice}</span>
   </div>{/if}
 
+<!-- A running check turns its button off via aria-disabled, not disabled,
+     so a keyboard press keeps focus there instead of dropping it to <body>. -->
 {#snippet checkStatus()}<button
     type="button"
     class="text-button"
-    onclick={() => onCheckStatus()}
-    disabled={checking}
+    onclick={() => !checking && onCheckStatus()}
+    aria-disabled={checking ? 'true' : undefined}
     >{m().dispatch.uncertain.checkStatus}<Icon
       name="refresh"
       size={12}

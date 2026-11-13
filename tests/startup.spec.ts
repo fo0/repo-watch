@@ -10,6 +10,7 @@ type MockState = {
   readError: boolean;
   writeError: boolean;
   delay: number;
+  readDelay: number;
 };
 async function setup(page: Page, status = 'disabled') {
   const mock = await installTauriMock<{ fixture: typeof fixture }, MockState>(
@@ -30,6 +31,7 @@ async function setup(page: Page, status = 'disabled') {
         if (cmd === 'snapshot' || cmd === 'refresh_snapshot')
           return structuredClone(snapshot);
         if (cmd === 'autostart_status') {
+          await new Promise((resolve) => setTimeout(resolve, state.readDelay));
           if (state.readError)
             throw 'Windows-Autostart konnte nicht gelesen werden.';
           return { status: state.status, registered: state.registered };
@@ -57,6 +59,7 @@ async function setup(page: Page, status = 'disabled') {
         readError: false,
         writeError: false,
         delay: 0,
+        readDelay: 0,
       },
     },
   );
@@ -206,6 +209,19 @@ test('read/write failures stay uncertain until a fresh OS read succeeds', async 
   await page.getByRole('button', { name: 'Status prüfen' }).click();
   await expect(checkbox).toBeChecked();
   await expect(panel.getByRole('alert')).toHaveCount(0);
+});
+
+test('„Status prüfen“ keeps focus while Windows is read', async ({ page }) => {
+  const mock = await setup(page, 'disabledByWindows');
+  await mock.configure({ readDelay: 350 });
+  const check = page.getByRole('button', { name: 'Status prüfen' });
+  await check.focus();
+  await page.keyboard.press('Enter');
+  await expect(check).toHaveAttribute('aria-disabled', 'true');
+  await expect(check).toBeFocused();
+  await expect(check).not.toHaveAttribute('aria-disabled');
+  await expect(check).toBeFocused();
+  expect((await readCalls(page, 'autostart_status')).length).toBe(2);
 });
 
 test('foreign registrations cannot be edited; future Windows formats stay unknown', async ({

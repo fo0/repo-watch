@@ -76,9 +76,14 @@
     border-color: GrayText;
     color: GrayText;
   }
-  /* A running refresh is off via aria-disabled, which gets no system grey. */
+  /* Controls off via aria-disabled (a running refresh, status check or
+     favorite change) keep focus but get no system grey. */
   .app-bar .icon-button[aria-disabled='true'],
-  .app-footer > button[aria-disabled='true'] {
+  .app-footer > button[aria-disabled='true'],
+  .text-button[aria-disabled='true'],
+  .startup-actions .secondary-button[aria-disabled='true'],
+  .favorite-button[aria-disabled='true'],
+  .pin-row .pin-heart[aria-disabled='true'] {
     color: GrayText;
   }
   .pin-row .pin-open:focus-visible::after {

@@ -59,8 +59,9 @@
     {@const last = lastRun(pin)}
     {@const moment = last && lastRunMoment(last, $minuteClock, demo)}
     <!-- `data-pin-*` lets focus move to a neighbour or a restored row; the
-         name comes first, so a restored row focuses it. Name, gear and start
-         are off via aria-disabled: a start that locks them keeps focus. -->
+         name comes first, so a restored row focuses it. Name, gear, heart
+         and start are off via aria-disabled: a start or a favorite change
+         that locks them keeps focus. -->
     <li class="pin-row" class:uncertain data-pin-id={pin.id}>
       <!-- The time of the last run drops out whole before the repository
            shortens; „läuft“ stays. Both are in the tooltip, which is also
@@ -112,8 +113,9 @@
         data-pin-remove
         aria-label={names.remove}
         title={m().favorites.tiles.remove}
-        disabled={!can.canRemove}
-        onclick={() => onRemove(pin.id)}><Icon name="heart" size={14} /></button
+        aria-disabled={can.canRemove ? undefined : 'true'}
+        onclick={() => can.canRemove && onRemove(pin.id)}
+        ><Icon name="heart" size={14} /></button
       >
       <!-- Starts at once when the stored request is complete; otherwise the
            start dialog opens with the favorite section to complete it. A
