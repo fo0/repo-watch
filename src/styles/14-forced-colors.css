@@ -79,7 +79,8 @@
   /* A running refresh is off via aria-disabled, which gets no system grey. */
   .app-bar .icon-button[aria-disabled='true'],
   .app-footer > button[aria-disabled='true'],
-  .text-button[aria-disabled='true'] {
+  .text-button[aria-disabled='true'],
+  .startup-actions .secondary-button[aria-disabled='true'] {
     color: GrayText;
   }
   .pin-row .pin-open:focus-visible::after {

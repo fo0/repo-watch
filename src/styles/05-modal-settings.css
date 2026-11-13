@@ -94,7 +94,7 @@
   background: var(--raised);
   border: 1px solid var(--border-strong);
 }
-.secondary-button:hover:not(:disabled) {
+.secondary-button:hover:not(:disabled):not([aria-disabled='true']) {
   background: var(--hover);
 }
 .secondary-button.compact {
