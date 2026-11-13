@@ -147,6 +147,47 @@ test('ArrowDown in the search moves focus to the first result', async ({
   ]);
 });
 
+test('ArrowDown and ArrowUp move between the results in page order', async ({
+  page,
+}) => {
+  const search = page.getByLabel('Übersicht durchsuchen');
+  const results = page.locator(
+    '.content :is(.live-run, .pin-open, .repository-toggle, .run-button)',
+  );
+  await expect(results.nth(1)).toBeVisible();
+  await search.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(results.nth(0)).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(results.nth(1)).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(results.nth(0)).toBeFocused();
+  // ArrowUp on the first result returns to the search field.
+  await page.keyboard.press('ArrowUp');
+  await expect(search).toBeFocused();
+  // The step crosses sections: the last live run leads to the first favorite.
+  const lastLive = page.locator('.live-run').last();
+  await lastLive.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('.pin-open').first()).toBeFocused();
+  // On the last result the key keeps its default and focus stays.
+  const last = results.last();
+  await last.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(last).toBeFocused();
+  // With a modifier the key is left alone.
+  await results.nth(1).focus();
+  await page.keyboard.press('Shift+ArrowUp');
+  await expect(results.nth(1)).toBeFocused();
+  expect(await prevented(page)).toEqual([
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+  ]);
+});
+
 test('F5, Ctrl+R and Ctrl+1/2/3 still work from the search field', async ({
   page,
 }) => {

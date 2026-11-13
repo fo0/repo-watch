@@ -106,6 +106,7 @@ describe('sectionKey and shortcutHint', () => {
     expect(shortcutHint()).toContain('zurück zur Übersicht');
     expect(shortcutHint()).toContain('Strg+, – Einstellungen');
     expect(shortcutHint()).toContain('/ oder Strg+F – Suche');
+    expect(shortcutHint()).toContain('↓ / ↑ – nächster / vorheriger Treffer');
   });
 });
 
