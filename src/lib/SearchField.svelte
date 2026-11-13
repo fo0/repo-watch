@@ -5,6 +5,7 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
   import { m } from './i18n/index.svelte';
+  import { RESULT, resultStep } from './results';
   import { shortcutHint } from './shortcuts';
 
   let {
@@ -29,31 +30,41 @@
     if (select) input?.select();
   }
 
-  /**
-   * The main button of each listed result: a live run, a favorite, a
-   * repository row or a Verlauf run, in the order the page shows them.
-   */
-  const RESULT =
-    '.content :is(.live-run, .pin-open, .repository-toggle, .run-button)';
+  /** A plain arrow key: no modifier, no IME composition. */
+  const plain = (event: KeyboardEvent) =>
+    !event.isComposing &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.shiftKey;
 
   /**
    * ArrowDown in the field moves focus to the first result, so a search
    * continues on the keyboard; without a result the caret stays.
    */
   function onkeydown(event: KeyboardEvent) {
-    if (
-      event.key !== 'ArrowDown' ||
-      event.isComposing ||
-      event.altKey ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.shiftKey
-    )
-      return;
+    if (event.key !== 'ArrowDown' || !plain(event)) return;
     const first = document.querySelector<HTMLElement>(RESULT);
     if (!first) return;
     event.preventDefault();
     first.focus();
+  }
+
+  /**
+   * ArrowDown and ArrowUp on a result move focus to the next or previous
+   * one, in page order; ArrowUp on the first returns to the field. On the
+   * last result the key keeps its default and scrolls.
+   */
+  function onResultKey(event: KeyboardEvent) {
+    if (event.defaultPrevented || !plain(event)) return;
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.matches(RESULT)) return;
+    const results = [...document.querySelectorAll<HTMLElement>(RESULT)];
+    const step = resultStep(event.key, results.indexOf(target), results.length);
+    if (step === null) return;
+    event.preventDefault();
+    if (step === 'search') input?.focus();
+    else results[step]?.focus();
   }
 
   /** Escape in the field clears the query first, then leaves the field. */
@@ -64,6 +75,8 @@
     return true;
   }
 </script>
+
+<svelte:window onkeydown={onResultKey} />
 
 <!-- On the overview the field is where focus lands when nothing better is
      left; a maximized section lands on its title instead. -->

@@ -21,6 +21,17 @@ test.describe('demo', () => {
     ).toBeEnabled();
   });
 
+  test('a search matches every word in any order', async ({ page }) => {
+    const search = page.getByLabel('Übersicht durchsuchen');
+    // Workflow first, then part of the repository name.
+    await search.fill('health runner-tools');
+    await expect(page.locator('.repository-card')).toHaveCount(1);
+    await expect(card(page, 'example-org/runner-tools-demo')).toBeVisible();
+    // A word that matches nothing empties the list.
+    await search.fill('health website');
+    await expect(page.locator('.repository-card')).toHaveCount(0);
+  });
+
   test('a search finds a repository outside the automatic ones; opening it loads its workflows for a favorite', async ({
     page,
   }) => {

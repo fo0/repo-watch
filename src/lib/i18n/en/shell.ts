@@ -105,6 +105,7 @@ export const shell: typeof German = {
   shortcuts: [
     'Keyboard shortcuts',
     '/ or Ctrl+F – Search',
+    '↓ / ↑ – Next / previous result',
     'F5 or Ctrl+R – Refresh',
     'Ctrl+1, 2, 3 – Maximize Repositories, History, Favorites; again to go back',
     'Ctrl+, – Settings',

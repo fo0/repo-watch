@@ -106,6 +106,7 @@ export const shell = {
   shortcuts: [
     'Tastenkürzel',
     '/ oder Strg+F – Suche',
+    '↓ / ↑ – nächster / vorheriger Treffer',
     'F5 oder Strg+R – Aktualisieren',
     'Strg+1, 2, 3 – Repositories, Verlauf, Favoriten maximieren; nochmal zurück',
     'Strg+, – Einstellungen',

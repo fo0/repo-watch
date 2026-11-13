@@ -12,6 +12,7 @@
   import type { Panel } from './panel.svelte';
   import { repositoryActivity } from './repoActivity';
   import { historyRuns, visibleRuns } from './runs';
+  import { matchesTerms, searchTerms } from './search';
   import { pageTitle, type PanelView } from './view.svelte';
 
   let {
@@ -56,12 +57,12 @@
   const count = (filter: 'active' | 'failed') =>
     data ? visibleRuns(data, accountId, '', filter).length : 0;
   const pins = $derived.by(() => {
-    const needle = query.trim().toLowerCase();
+    const terms = searchTerms(query);
     return (
       snapshot?.pins.filter(
         (pin) =>
           panel.repos.some((repo) => repo.id === pin.repoId) &&
-          `${pin.label} ${repoName(pin.repoId)}`.toLowerCase().includes(needle),
+          matchesTerms(`${pin.label} ${repoName(pin.repoId)}`, terms),
       ) ?? []
     );
   });

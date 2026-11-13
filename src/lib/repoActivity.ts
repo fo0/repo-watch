@@ -2,6 +2,7 @@
 import { isHidden } from './hiddenRepos';
 import { fullRepo } from './model';
 import { isActive, recentRuns, repositoryStatus } from './runs';
+import { matchesTerms, searchTerms } from './search';
 import type { Repo, Run, Snapshot, Workflow } from './types';
 
 /**
@@ -17,13 +18,14 @@ export function repositoryActivity(
   accountId: string,
   query: string,
 ) {
-  const needle = query.trim().toLocaleLowerCase();
+  const terms = searchTerms(query);
+  const searching = terms.length > 0;
   const ofAccount = snapshot.repos.filter(
     (repo) => !accountId || repo.accountId === accountId,
   );
   const hidden = (repo: Repo) => isHidden(snapshot.hiddenRepos, repo);
   const loaded = ofAccount
-    .filter((repo) => repo.selected && (!!needle || !hidden(repo)))
+    .filter((repo) => repo.selected && (searching || !hidden(repo)))
     .map((repo) => {
       const runs = snapshot.runs.filter((run) => run.repoId === repo.id);
       const latest = [...runs].sort(
@@ -32,12 +34,8 @@ export function repositoryActivity(
       const all = snapshot.workflows.filter(
         (workflow) => workflow.repoId === repo.id,
       );
-      const workflows = all.filter(
-        (workflow) =>
-          !needle ||
-          `${fullRepo(repo)} ${workflow.name}`
-            .toLocaleLowerCase()
-            .includes(needle),
+      const workflows = all.filter((workflow) =>
+        matchesTerms(`${fullRepo(repo)} ${workflow.name}`, terms),
       );
       return {
         repo,
@@ -53,21 +51,16 @@ export function repositoryActivity(
     })
     .filter(
       ({ repo, workflows }) =>
-        !needle ||
-        fullRepo(repo).toLocaleLowerCase().includes(needle) ||
-        workflows.length > 0,
+        matchesTerms(fullRepo(repo), terms) || workflows.length > 0,
     )
     .sort(
       (a, b) =>
         lastActivity(b) - lastActivity(a) ||
         fullRepo(a.repo).localeCompare(fullRepo(b.repo)),
     );
-  if (!needle) return loaded;
+  if (!searching) return loaded;
   const found = ofAccount
-    .filter(
-      (repo) =>
-        !repo.selected && fullRepo(repo).toLocaleLowerCase().includes(needle),
-    )
+    .filter((repo) => !repo.selected && matchesTerms(fullRepo(repo), terms))
     .sort(
       (a, b) =>
         (Date.parse(b.pushedAt ?? '') || 0) -
