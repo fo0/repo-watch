@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './support/test';
-import { openLaunch, openPage, templateCard } from './support/demo';
+import { openLaunch, openPage, scenario, templateCard } from './support/demo';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -114,3 +114,33 @@ for (const view of ['favorites', 'overview'] as const) {
     await expect(chip).toBeEnabled();
   });
 }
+
+test('„Status prüfen“ keeps focus while the check runs', async ({ page }) => {
+  await scenario(page, 'uncertain');
+  let dialog = await openLaunch(page);
+  await dialog.getByRole('button', { name: 'Start simulieren' }).click();
+  await dialog.getByRole('button', { name: 'Schließen', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Workflow starten …', exact: true })
+    .click();
+  dialog = page.getByRole('dialog', { name: 'Workflow starten' });
+  const check = dialog.getByRole('button', {
+    name: 'Status prüfen',
+    exact: true,
+  });
+  // The demo answers after 300 ms; a paused clock holds the check in flight.
+  await page.clock.install();
+  await page.clock.pauseAt(Date.now() + 2000);
+  await check.focus();
+  await page.keyboard.press('Enter');
+  await expect(check).toHaveAttribute('aria-disabled', 'true');
+  await expect(check).toBeFocused();
+  await page.clock.runFor(400);
+  await expect(
+    dialog.getByText(
+      /Status geprüft\. GitHub hat den Start weiterhin nicht bestätigt/,
+    ),
+  ).toBeVisible();
+  await expect(check).not.toHaveAttribute('aria-disabled');
+  await expect(check).toBeFocused();
+});
