@@ -3,6 +3,7 @@ import type { IconName } from './Icon.svelte';
 import { isHidden } from './hiddenRepos';
 import { m } from './i18n/index.svelte';
 import { fullRepo } from './model';
+import { matchesTerms, searchTerms } from './search';
 import type { Run, Snapshot } from './types';
 
 export type ActivityFilter = 'all' | 'active' | 'failed' | 'recent';
@@ -160,7 +161,7 @@ export function visibleRuns(
   query: string,
   filter: ActivityFilter,
 ): Run[] {
-  const needle = query.trim().toLocaleLowerCase();
+  const terms = searchTerms(query);
   // A hidden repository's runs stay out of every run list (ADR-0008).
   const repos = new Map(
     snapshot.repos
@@ -182,12 +183,7 @@ export function visibleRuns(
       )
         return false;
       if (filter === 'recent' && isActive(run)) return false;
-      return (
-        !needle ||
-        `${fullRepo(repo)} ${run.name} ${run.branch}`
-          .toLocaleLowerCase()
-          .includes(needle)
-      );
+      return matchesTerms(`${fullRepo(repo)} ${run.name} ${run.branch}`, terms);
     })
     .sort(
       (a, b) =>

@@ -87,6 +87,14 @@ describe('activity model', () => {
     expect(
       visibleRuns(data, '', 'DEVELOP', 'all').map((run) => run.id),
     ).toEqual([8402]);
+    // Every word must match, in any order: branch, workflow, repository.
+    expect(
+      visibleRuns(data, '', 'develop launch-kit', 'all').map((run) => run.id),
+    ).toEqual([8402]);
+    expect(
+      visibleRuns(data, '', 'main  desktop', 'all').map((run) => run.id),
+    ).toEqual([8401]);
+    expect(visibleRuns(data, '', 'main develop', 'all')).toEqual([]);
     expect(visibleRuns(data, '', '', 'failed').map((run) => run.id)).toEqual([
       8404,
     ]);

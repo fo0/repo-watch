@@ -177,6 +177,18 @@ describe('repository search', () => {
     ]);
   });
 
+  it('matches every word of the query in any order', () => {
+    const groups = repositoryActivity(snapshot(), '', 'build launch-kit');
+    expect(groups.map(({ repo }) => repo.id)).toEqual(['demo-personal-kit']);
+    expect(groups[0]!.workflows.map((workflow) => workflow.name)).toEqual([
+      'Desktop build',
+    ]);
+    // An unloaded repository needs every word in its owner/name.
+    expect(ids(repositoryActivity(snapshot(), '', 'demo sandbox'))).toEqual([
+      ['demo-extra', false],
+    ]);
+  });
+
   it('keeps the account filter and never lists them without a query', () => {
     const data = snapshot();
     expect(repositoryActivity(data, 'demo-personal', 'sandbox')).toEqual([]);
