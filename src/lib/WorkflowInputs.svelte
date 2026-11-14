@@ -5,11 +5,17 @@
   let {
     workflow,
     values,
+    invalid = null,
+    describedBy,
     disabled,
     onChange,
   }: {
     workflow: Workflow | undefined;
     values: Record<string, InputValue>;
+    /** Name of the input that blocks the start; its field is marked. */
+    invalid?: string | null;
+    /** ID of the message that explains the marked field. */
+    describedBy?: string | undefined;
     disabled: boolean;
     onChange: (name: string, value: InputValue) => void;
   } = $props();
@@ -19,6 +25,16 @@
 
   /** Text shown in a field; numbers keep their digits, unset values stay empty. */
   const text = (input: InputSpec) => String(values[input.name] ?? '');
+  /** The field's note and, while it blocks the start, the message naming it. */
+  const description = (input: InputSpec) =>
+    [
+      input.note ? `input-note-${input.name}` : '',
+      input.name === invalid ? (describedBy ?? '') : '',
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
+  const invalidFlag = (input: InputSpec) =>
+    input.name === invalid ? 'true' : undefined;
   /** An empty number field is unset, not zero. */
   const parseNumber = (value: string): InputValue =>
     value === '' ? '' : Number(value);
@@ -47,7 +63,8 @@
       >{#if input.type === 'choice' || input.type === 'environment'}<select
           aria-label={input.label}
           aria-required={input.required ? 'true' : undefined}
-          aria-describedby={input.note ? `input-note-${input.name}` : undefined}
+          aria-invalid={invalidFlag(input)}
+          aria-describedby={description(input)}
           value={text(input)}
           onchange={(event) => onChange(input.name, event.currentTarget.value)}
           {disabled}
@@ -60,6 +77,8 @@
           type="number"
           aria-label={input.label}
           aria-required={input.required ? 'true' : undefined}
+          aria-invalid={invalidFlag(input)}
+          aria-describedby={description(input)}
           value={text(input)}
           oninput={(event) =>
             onChange(input.name, parseNumber(event.currentTarget.value))}
@@ -69,6 +88,8 @@
           type="text"
           aria-label={input.label}
           aria-required={input.required ? 'true' : undefined}
+          aria-invalid={invalidFlag(input)}
+          aria-describedby={description(input)}
           value={text(input)}
           oninput={(event) => onChange(input.name, event.currentTarget.value)}
           autocomplete="off"
