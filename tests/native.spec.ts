@@ -196,6 +196,8 @@ test('native invalid token is rejected and disconnect removes the account view',
   await connectToken(page, 'invalid-synthetic-token');
   await expect(page.getByRole('alert')).toContainText('Token nicht bestätigt');
   await expect(page.getByLabel('GitHub-Token')).toHaveValue('');
+  // The emptied field takes focus for the corrected token.
+  await expect(page.getByLabel('GitHub-Token')).toBeFocused();
   // The failed step stays open; „Zurück“ and „Abbrechen“ leave it.
   await page.getByRole('button', { name: 'Zurück', exact: true }).click();
   await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();

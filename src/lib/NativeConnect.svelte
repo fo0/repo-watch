@@ -59,15 +59,22 @@
     const token = input?.value ?? '';
     if (input) input.value = '';
     hasToken = false;
+    let failed = false;
     try {
       const snapshot = await call('connect_token', { token });
       if (active && ticket === generation) onConnected(snapshot);
     } catch (cause) {
-      if (active && ticket === generation)
+      if (active && ticket === generation) {
         error = ipcErrorMessage(cause, m().accounts.connect.failed);
+        failed = true;
+      }
     } finally {
       if (active && ticket === generation) busy = false;
     }
+    // The emptied field takes focus, so a corrected token goes straight in.
+    if (!failed) return;
+    await tick();
+    if (active && ticket === generation) input?.focus();
   }
   onDestroy(() => {
     active = false;
