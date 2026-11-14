@@ -1,6 +1,6 @@
 import type { DispatchSeed } from './DispatchDialog.svelte';
 import { m } from './i18n/index.svelte';
-import { defaultInputs, validateDispatch } from './model';
+import { defaultInputs, inputProblem, validateDispatch } from './model';
 import type { Panel } from './panel.svelte';
 import type { DispatchRequest, DispatchTarget, InputValue, Pin } from './types';
 
@@ -44,6 +44,11 @@ export class DispatchForm {
       ? validateDispatch(this.#panel.snapshot, this.request('validation'))
       : m().dispatch.dialog.chooseTarget,
   );
+  /** The workflow input the validation message names; the form marks it. */
+  invalidInput = $derived.by(() => {
+    const problem = this.workflow && inputProblem(this.workflow, this.inputs);
+    return problem && problem.message === this.validation ? problem.name : null;
+  });
 
   constructor(panel: Panel, seed: DispatchSeed, onRetarget: () => void) {
     this.#panel = panel;

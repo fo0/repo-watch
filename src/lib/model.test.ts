@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fixture from '../../fixtures/demo.json';
 import {
   defaultInputs,
+  inputProblem,
   RequestEpoch,
   safePin,
   targetKey,
@@ -140,6 +141,27 @@ describe('dispatch validation', () => {
         request({ workflowId: 102, inputs: { environment: 'staging' } }),
       ),
     ).toBeNull();
+  });
+});
+
+describe('input problems', () => {
+  it('names the first input that blocks a start, with the validation message', () => {
+    const data = snapshot();
+    const workflow = data.workflows[0]!;
+    const inputs = request().inputs;
+    expect(inputProblem(workflow, inputs)).toBeNull();
+    expect(inputProblem(workflow, { ...inputs, version: ' ' })).toEqual({
+      name: 'version',
+      message: 'Version ist erforderlich.',
+    });
+    const problem = inputProblem(workflow, { ...inputs, target: 'linux' });
+    expect(problem?.name).toBe('target');
+    expect(
+      validateDispatch(
+        data,
+        request({ inputs: { ...inputs, target: 'linux' } }),
+      ),
+    ).toBe(problem?.message);
   });
 });
 

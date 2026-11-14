@@ -84,7 +84,13 @@ test('a favorite that still needs input opens the start dialog instead of starti
   await nativeFavorites(page, { incomplete: true });
   await button(page, 'Windows build', 'jetzt starten').click();
   const dialog = page.getByRole('dialog', { name: 'Workflow starten' });
-  await expect(dialog.getByLabel('Version', { exact: true })).toHaveValue('');
+  const version = dialog.getByLabel('Version', { exact: true });
+  await expect(version).toHaveValue('');
+  // The field that blocks the start is marked and names the reason.
+  await expect(version).toHaveAttribute('aria-invalid', 'true');
+  await expect(version).toHaveAccessibleDescription(
+    'Version ist erforderlich.',
+  );
   await expect(dialog.getByLabel('Branch oder Tag')).toHaveValue('main');
   // The favorite section is open to fix and update the stored defaults.
   await expect(
@@ -93,6 +99,8 @@ test('a favorite that still needs input opens the start dialog instead of starti
   await expect(dialog.getByLabel('Name des Favoriten')).toHaveValue(
     'Windows build',
   );
+  await version.fill('1.2.3');
+  await expect(version).not.toHaveAttribute('aria-invalid');
   expect(await readCalls(page, 'dispatch_workflow')).toEqual([]);
 });
 

@@ -64,29 +64,42 @@ export function validateDispatch(
     )
   )
     return text.unknownInput;
+  return inputProblem(workflow, request.inputs)?.message ?? null;
+}
+
+/**
+ * The first workflow input whose value would block a start, with the
+ * message that names it; the start dialog marks that field.
+ */
+export function inputProblem(
+  workflow: Workflow,
+  inputs: Record<string, InputValue>,
+): { name: string; message: string } | null {
+  const text = m().common.validation;
   for (const input of workflow.inputs) {
-    const value = request.inputs[input.name];
+    const value = inputs[input.name];
     const absent =
       value === undefined || (typeof value === 'string' && !value.trim());
-    if (absent && input.required) return text.required(input.label);
+    const problem = (message: string) => ({ name: input.name, message });
+    if (absent && input.required) return problem(text.required(input.label));
     if (absent) continue;
     if (input.type === 'boolean' && typeof value !== 'boolean')
-      return text.boolean(input.label);
+      return problem(text.boolean(input.label));
     if (
       input.type === 'number' &&
       (typeof value !== 'number' || !Number.isFinite(value))
     )
-      return text.number(input.label);
+      return problem(text.number(input.label));
     if (
       ['string', 'choice', 'environment'].includes(input.type) &&
       typeof value !== 'string'
     )
-      return text.text(input.label);
+      return problem(text.text(input.label));
     if (
       ['choice', 'environment'].includes(input.type) &&
       !input.options.includes(String(value))
     )
-      return text.option(input.label);
+      return problem(text.option(input.label));
   }
   return null;
 }
