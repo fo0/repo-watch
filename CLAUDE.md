@@ -69,7 +69,7 @@ Contract: `.claude/skills/orca/SKILL.md`.
 
 ## Tech Stack
 
-TypeScript 5.9 · Svelte 5 · Vite 7 · pnpm 11.19 · Vitest 3 + Playwright · Prettier 3 · ESLint 10
+TypeScript 5.9 · Svelte 5 · Vite 7 · pnpm 11.19 · Vitest 5 + Playwright · Prettier 3 · ESLint 10
 Rust 2021 · Tauri 2 · Cargo (`src-tauri/`) · rusqlite · keyring · rustfmt + clippy
 
 ## Project Overview
@@ -141,7 +141,7 @@ Never committed (where they live: `agent_docs/env-vars.md → Secrets Locations`
 
 ## Testing
 
-**Vitest 3 · Playwright · node:test · cargo test** · see _Commands_ · layout, boundaries, constraints: `agent_docs/testing.md`.
+**Vitest 5 · Playwright · node:test · cargo test** · see _Commands_ · layout, boundaries, constraints: `agent_docs/testing.md`.
 
 ## External Integrations / MCPs
 
