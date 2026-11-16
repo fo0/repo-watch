@@ -42,6 +42,8 @@
   --ok: #4ade80;
   --fail: #f87171;
   --wait: #fbbf24;
+  /* Queued for more than 24 h: apart from waiting in the colour-only run strip. */
+  --stuck: #fb923c;
   --none: #2c2c33;
 
   --scrollbar: #3a3a42;
@@ -92,6 +94,7 @@
     --ok: #187733;
     --fail: #b81e29;
     --wait: #8a5d00;
+    --stuck: #b34700;
     --none: #e2e2e8;
     --scrollbar: #c4c4cc;
     --backdrop: rgba(17, 17, 20, 0.36);
@@ -122,6 +125,7 @@
   --ok: #187733;
   --fail: #b81e29;
   --wait: #8a5d00;
+  --stuck: #b34700;
   --none: #e2e2e8;
   --scrollbar: #c4c4cc;
   --backdrop: rgba(17, 17, 20, 0.36);

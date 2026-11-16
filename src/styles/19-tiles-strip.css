@@ -25,7 +25,7 @@
 }
 /* Queued for more than 24 h: GitHub neither starts nor cancels it. */
 [data-tone='stuck'] {
-  color: var(--wait);
+  color: var(--stuck);
 }
 
 /* A run's status icon on a tile tinted in its own colour. */
