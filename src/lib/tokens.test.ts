@@ -126,7 +126,7 @@ function contrast(foreground: Rgba, background: Rgba): number {
 }
 
 const TEXT = ['--text', '--text-2', '--text-3', '--accent'];
-const STATUS = ['--run', '--ok', '--fail', '--wait'];
+const STATUS = ['--run', '--ok', '--fail', '--wait', '--stuck'];
 const SURFACES = ['--surface', '--raised', '--hover'];
 /**
  * Text on a tint: alerts, outcomes, confirmations, the danger button's hover,
