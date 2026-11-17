@@ -1,7 +1,7 @@
 # RepoWatch
 
-[![Release](https://github.com/fo0/repo-watch/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/fo0/repo-watch/actions/workflows/release.yml)
-[![Windows release](https://github.com/fo0/repo-watch/actions/workflows/release.yml/badge.svg?branch=main&event=workflow_dispatch)](https://github.com/fo0/repo-watch/actions/workflows/release.yml)
+[![Desktop Release](https://github.com/fo0/repo-watch/actions/workflows/desktop-release.yml/badge.svg?branch=main)](https://github.com/fo0/repo-watch/actions/workflows/desktop-release.yml)
+[![Windows release](https://github.com/fo0/repo-watch/actions/workflows/desktop-release.yml/badge.svg?branch=main&event=workflow_dispatch)](https://github.com/fo0/repo-watch/actions/workflows/desktop-release.yml)
 
 <img src="src-tauri/icons/source.svg" alt="" width="64" height="64" align="right" />
 
@@ -51,7 +51,7 @@ Saved connections visibly show login, source and whether they are active in Repo
 
 Published Windows installers, when available, are listed on the [Releases page](https://github.com/fo0/repo-watch/releases). If no release is listed, build the installer from source below.
 
-The standard Windows x64 NSIS installer is **unsigned** and can be built and released without signing keys. Download and run the public EXE to install; later updates install from inside the app. The separately configured signed-updater path keeps its signature verification enabled; the standard Release Action does not create those updater artifacts. See [release and update behavior](docs/RELEASES.md).
+The standard Windows x64 NSIS installer is **unsigned** and can be built and released without signing keys. Download and run the public EXE to install; later updates install from inside the app. The separately configured signed-updater path keeps its signature verification enabled; the standard Desktop Release Action does not create those updater artifacts. See [release and update behavior](docs/RELEASES.md).
 
 ### Native development
 
@@ -91,9 +91,9 @@ Open **http://127.0.0.1:1420**. This preview uses labelled synthetic accounts an
 
 ## CI and releases
 
-[CI](.github/workflows/ci.yml) runs on pull requests: frontend, browser interactions, reproducible icons, Rust formatting/tests/Clippy and Windows desktop Clippy with Win32 popup/window-ownership and isolated autostart-registry tests. Pull requests skip the Rust and Windows jobs when they touch nothing those jobs check. A failed browser test run uploads the Playwright report as an artifact. [Release](.github/workflows/release.yml) is started by hand on `main`: the full CI for that commit, then the unsigned Windows EXE with a generated changelog on the [Releases page](https://github.com/fo0/repo-watch/releases).
+[CI](.github/workflows/ci.yml) runs on pull requests: frontend, browser interactions, reproducible icons, Rust formatting/tests/Clippy and Windows desktop Clippy with Win32 popup/window-ownership and isolated autostart-registry tests. Pull requests skip the Rust and Windows jobs when they touch nothing those jobs check. A failed browser test run uploads the Playwright report as an artifact. [Desktop Release](.github/workflows/desktop-release.yml) is started by hand on `main`: the full CI for that commit, then the unsigned Windows EXE with a generated changelog on the [Releases page](https://github.com/fo0/repo-watch/releases).
 
-[Release](.github/workflows/release.yml) handles explicitly requested unsigned Windows EXE releases with generated versions and changelogs. No additional signing key is required; see the release documentation. Both badges above follow the manual release runs on `main`; CI runs on pull requests and inside each release run. See [release documentation](docs/RELEASES.md) for the exact triggers and publishing process.
+[Desktop Release](.github/workflows/desktop-release.yml) handles explicitly requested unsigned Windows EXE releases with generated versions and changelogs. No additional signing key is required; see the release documentation. Both badges above follow the manual release runs on `main`; CI runs on pull requests and inside each release run. See [release documentation](docs/RELEASES.md) for the exact triggers and publishing process.
 
 Local verification:
 

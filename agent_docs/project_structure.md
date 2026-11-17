@@ -9,7 +9,7 @@ tests/      Playwright specs (demo + IPC mock)
 scripts/    icon generator, release/updater helpers + node:test
 fixtures/   synthetic demo data
 docs/       product docs, adr/, ARCHITECTURE.mmd
-.github/    ci.yml (pull requests), release.yml (manual)
+.github/    ci.yml (pull requests), desktop-release.yml (manual)
 ```
 
 Module-level detail: `docs/ARCHITECTURE.md`, diagram `docs/ARCHITECTURE.mmd`.

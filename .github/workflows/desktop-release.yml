@@ -1,4 +1,4 @@
-name: Release
+name: Desktop Release
 # Started by hand on main: CI for that commit, then build and publish the unsigned
 # Windows EXE with a CalVer version and GitHub-generated changelog.
 on:

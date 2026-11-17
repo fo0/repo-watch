@@ -71,7 +71,7 @@ flowchart TD
         Checks("ci.yml")
         RustTests["cargo tests"]
         IpcContract["ipc.contract.test.ts"]
-        ReleaseYml("release.yml")
+        ReleaseYml("desktop-release.yml")
         ReleaseScripts["release.mjs and updater.mjs"]
     end
 
@@ -223,7 +223,7 @@ flowchart TD
     click DemoRs "src-tauri/src/demo.rs"
     click Checks ".github/workflows/ci.yml"
     click IpcContract "src/lib/ipc.contract.test.ts"
-    click ReleaseYml ".github/workflows/release.yml"
+    click ReleaseYml ".github/workflows/desktop-release.yml"
     click ReleaseScripts "scripts/release.mjs"
 
     classDef frontend fill:#42b883,stroke:#35495e,color:#fff

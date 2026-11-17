@@ -33,7 +33,7 @@ jobs:
           files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[] | .filename, (.previous_filename // empty)')
           touches() { grep -qE "$1" <<< "$files" && echo true || echo false; }
           # Rust tests embed fixtures/; rust-toolchain.toml picks the compiler; release:test reads
-          # scripts/ and release.yml.
+          # scripts/ and desktop-release.yml.
           echo "rust=$(touches '^(src-tauri/|fixtures/|rust-toolchain\.toml$|\.github/workflows/ci\.yml$)')" >> "$GITHUB_OUTPUT"
           echo "desktop=$(touches '^(src-tauri/|fixtures/|rust-toolchain\.toml$|scripts/|\.github/workflows/|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.node-version$)')" >> "$GITHUB_OUTPUT"
   panel:
@@ -110,7 +110,7 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       # Lint and icon bytes are platform-independent and run in `panel`. The release
-      # tests execute release.yml's PowerShell blocks, which publish from Windows.
+      # tests execute desktop-release.yml's PowerShell blocks, which publish from Windows.
       - run: pnpm release:test
       # The desktop crate embeds dist/ at compile time.
       - run: pnpm build

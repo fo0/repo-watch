@@ -1,6 +1,6 @@
 # Windows releases without signing requirements
 
-The standard **Release** Action builds and publishes the unsigned Windows x64 NSIS EXE. It requires only the repository-provided `GITHUB_TOKEN` for publication. No Tauri signing key, updater public key, certificate, `.sig`, or `latest.json` is required. `src-tauri/tauri.release.conf.json` explicitly sets `createUpdaterArtifacts: false`; the Action has no signing preflight or signing-secret bindings.
+The standard **Desktop Release** Action builds and publishes the unsigned Windows x64 NSIS EXE. It requires only the repository-provided `GITHUB_TOKEN` for publication. No Tauri signing key, updater public key, certificate, `.sig`, or `latest.json` is required. `src-tauri/tauri.release.conf.json` explicitly sets `createUpdaterArtifacts: false`; the Action has no signing preflight or signing-secret bindings.
 
 ## App updates
 
@@ -23,7 +23,7 @@ A Tauri updater signature and a Windows Authenticode certificate are different m
 Two workflows, nothing else:
 
 - **CI** (`.github/workflows/ci.yml`) runs on pull requests. It always runs the frontend job (lint, typecheck, unit/release tests, build, Playwright). The Rust job runs only when the pull request touches `src-tauri/`, `fixtures/`, `rust-toolchain.toml` or `ci.yml`; the Windows job (desktop clippy, Win32 and credential-store tests, release tests on Windows) only when it touches those, `scripts/`, any workflow, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` or `.node-version`. Renamed files count with their old and new path. A new push cancels the pull request's running CI.
-- **Release** (`.github/workflows/release.yml`) starts only by hand: **Actions → Release → Run workflow** on `main` (on any other branch nothing runs). It first runs the complete CI for that exact commit, then builds the unsigned NSIS EXE on Windows and publishes it with a generated changelog covering everything merged since the previous release. Merges never start a release. Releases run one at a time.
+- **Desktop Release** (`.github/workflows/desktop-release.yml`) starts only by hand: **Actions → Desktop Release → Run workflow** on `main` (on any other branch nothing runs). It first runs the complete CI for that exact commit, then builds the unsigned NSIS EXE on Windows and publishes it with a generated changelog covering everything merged since the previous release. Merges never start a release. Releases run one at a time.
 
 Release publication uses the existing repository GITHUB_TOKEN; no additional signing secret is required. Rust caches are separated for Linux core, Windows checks and the release build; only runs on `main` save them.
 
