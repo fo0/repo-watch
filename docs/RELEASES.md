@@ -14,7 +14,7 @@ Standard unsigned builds update inside the app ([ADR-0004](adr/0004-in-app-updat
 
 There is no release-page link. Trust equals a manual download from the Releases page: GitHub's TLS plus the asset digest, no publisher signature. Code: `src-tauri/src/updates.rs`, `src-tauri/src/updates/installer.rs`, `src-tauri/src/desktop_updates.rs`, `src/lib/updater.svelte.ts`, `src/lib/UpdatePanel.svelte`.
 
-Builds compiled with an updater public key (`REPOWATCH_UPDATER_PUBLIC_KEY`, separately configured) use the Tauri updater behind the same `install_update` command and verify its signature; the plugin passes the launch arguments on (`/ARGS`). The standard Release Action generates no signed updater artifacts and publishes no `latest.json`, so the built-in signed feed (`releases/latest/download/latest.json`) currently resolves to nothing. Once signing is introduced, signed builds need a dedicated feed URL that serves only signed manifests.
+Builds compiled with an updater public key (`REPOWATCH_UPDATER_PUBLIC_KEY`, separately configured) use the Tauri updater behind the same `install_update` command and verify its signature; the plugin passes the launch arguments on (`/ARGS`). The standard Desktop Release Action generates no signed updater artifacts and publishes no `latest.json`, so the built-in signed feed (`releases/latest/download/latest.json`) currently resolves to nothing. Once signing is introduced, signed builds need a dedicated feed URL that serves only signed manifests.
 
 A Tauri updater signature and a Windows Authenticode certificate are different mechanisms; neither is needed to publish the standard EXE or to update it in the app.
 
