@@ -15,6 +15,20 @@ The app needs none at runtime. All of these are optional.
 | `CI`                                                                                      | test                              | `playwright.config.ts`, `scripts/release-workflow.test.mjs` | Forbid `.only`, one retry, no server reuse; PowerShell tests mandatory                          |
 | `REVIEW_BASE_URL`, `CARD_REVIEW_DIR`, `NAVIGATION_REVIEW_DIR`, `NAVIGATION_REVIEW_PREFIX` | script                            | `scripts/capture-*.mjs`                                     | Screenshot capture target / output dir and file prefix (`docs/review/`, gitignored)             |
 
+## Formats and defaults
+
+What the code accepts and falls back to when a variable is unset:
+
+- `REPOWATCH_GITHUB_CLIENT_ID` — starts with `Iv`, 8–80 characters, ASCII letters, digits and `.` only. Unset or invalid: browser sign-in counts as not set up (`browser_auth.rs → validate_publisher`).
+- `REPOWATCH_GITHUB_APP_SLUG` — 1–100 characters, lowercase letters, digits and `-` only; builds `https://github.com/apps/<slug>/installations/new`. Needs a valid Client ID beside it.
+- `REPOWATCH_UPDATER_PUBLIC_KEY` — the base64 Tauri updater (minisign) public key: decodes to two lines, `untrusted comment: …` and a 42-byte base64 key (`scripts/updater.mjs → updaterConfig`). In the Rust build, empty or whitespace counts as unset and the app uses the unsigned in-app update path (`desktop_updates.rs → updater_key`); `node scripts/updater.mjs config` fails without it.
+- `GH_CONFIG_DIR` — must be an absolute path; a relative one makes every local discovery command fail with an error instead of falling back (`local_auth.rs → run_process`). Unset: gh's own default location.
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE` — unset: Playwright's own downloaded Chromium (`pnpm exec playwright install chromium`).
+- `E2E_PORT` — default `1420`.
+- `REVIEW_BASE_URL` — default `http://127.0.0.1:1420` (the `pnpm dev` server).
+- `CARD_REVIEW_DIR` — default `docs/review/card-revision`.
+- `NAVIGATION_REVIEW_DIR` — default `docs/review/navigation`; `NAVIGATION_REVIEW_PREFIX` default empty.
+
 ## Secrets Locations
 
 Secrets are never committed. No secret is needed to build or test. Runtime GitHub tokens live only in the OS credential vault under RepoWatch's own namespaces (`github-<id>`, `github-gh-<id>`, `github-device-<id>`), never in the repo. The release workflow uses only the repository `GITHUB_TOKEN`; any further CI secret belongs in the CI secret store. Fixtures and captures are synthetic. No `.env` file is used; a local one would stay gitignored. A new secret gets a placeholder in `.env.example` and a question to the user — never `gh secret set` unprompted.
