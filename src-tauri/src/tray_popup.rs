@@ -211,47 +211,66 @@ fn schedule_dismiss(app: &tauri::AppHandle) {
     }
 }
 
+/// First delay before a dismissal check; deferred checks back off up to the cap.
+const CHECK_DELAY: Duration = Duration::from_millis(120);
+const MAX_CHECK_DELAY: Duration = Duration::from_millis(480);
+
+/// One thread per blur: it re-checks with backoff while the check defers, instead of
+/// spawning a new thread every 120 ms while an owned dialog or tray press lasts.
 fn check_later(app: tauri::AppHandle, token: u64) {
     std::thread::spawn(move || {
-        std::thread::sleep(Duration::from_millis(120));
-        let handle = app.clone();
-        let _ = app.run_on_main_thread(move || {
-            let Some(popup) = handle.try_state::<Popup>() else {
-                return;
-            };
-            let Ok(popup) = popup.0.lock() else { return };
-            if !popup.dismissal.is_current(token) {
-                return;
-            }
-            drop(popup);
-            let Some(window) = handle.get_webview_window("main") else {
-                return;
-            };
-            if !window.is_visible().unwrap_or(false) {
+        let mut delay = CHECK_DELAY;
+        loop {
+            std::thread::sleep(delay);
+            let (sender, receiver) = std::sync::mpsc::channel();
+            let handle = app.clone();
+            let queued = app.run_on_main_thread(move || {
+                let _ = sender.send(check_dismissal(&handle, token));
+            });
+            // A dropped closure (event loop gone) closes the channel and ends the loop.
+            if queued.is_err() || receiver.recv() != Ok(true) {
                 return;
             }
-            #[cfg(windows)]
-            let action = match window.hwnd() {
-                Ok(hwnd) => windows::dismiss_action(hwnd.0 as _, anchor(&handle)),
-                Err(_) => return,
-            };
-            #[cfg(not(windows))]
-            let action = if window.is_focused().unwrap_or(true) {
-                DismissAction::Focused
-            } else {
-                DismissAction::Hide
-            };
-            match action {
-                // Keep checking an owned native dialog or in-progress tray press:
-                // main may not emit another blur when focus leaves that dialog.
-                DismissAction::Defer => check_later(handle, token),
-                DismissAction::Hide => {
-                    let _ = hide(&handle);
-                }
-                DismissAction::Focused => {}
-            }
-        });
+            delay = (delay * 2).min(MAX_CHECK_DELAY);
+        }
     });
+}
+
+/// Runs on the main thread: hides the popup once focus left it for good, and returns
+/// whether to check again (an owned native dialog or in-progress tray press; main may
+/// not emit another blur when focus leaves that dialog).
+fn check_dismissal(handle: &tauri::AppHandle, token: u64) -> bool {
+    let Some(popup) = handle.try_state::<Popup>() else {
+        return false;
+    };
+    let Ok(popup) = popup.0.lock() else {
+        return false;
+    };
+    if !popup.dismissal.is_current(token) {
+        return false;
+    }
+    drop(popup);
+    let Some(window) = handle.get_webview_window("main") else {
+        return false;
+    };
+    if !window.is_visible().unwrap_or(false) {
+        return false;
+    }
+    #[cfg(windows)]
+    let action = match window.hwnd() {
+        Ok(hwnd) => windows::dismiss_action(hwnd.0 as _, anchor(handle)),
+        Err(_) => return false,
+    };
+    #[cfg(not(windows))]
+    let action = if window.is_focused().unwrap_or(true) {
+        DismissAction::Focused
+    } else {
+        DismissAction::Hide
+    };
+    if action == DismissAction::Hide {
+        let _ = hide(handle);
+    }
+    action == DismissAction::Defer
 }
 
 pub fn window_event(window: &tauri::Window, event: &WindowEvent) {
