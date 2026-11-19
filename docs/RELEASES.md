@@ -1,6 +1,6 @@
 # Windows releases without signing requirements
 
-The standard **Release** Action builds and publishes the unsigned Windows x64 NSIS EXE. It requires only the repository-provided `GITHUB_TOKEN` for publication. No Tauri signing key, updater public key, certificate, `.sig`, or `latest.json` is required. `src-tauri/tauri.release.conf.json` explicitly sets `createUpdaterArtifacts: false`; the Action has no signing preflight or signing-secret bindings.
+The standard **Desktop Release** Action builds and publishes the unsigned Windows x64 NSIS EXE. It requires only the repository-provided `GITHUB_TOKEN` for publication. No Tauri signing key, updater public key, certificate, `.sig`, or `latest.json` is required. `src-tauri/tauri.release.conf.json` explicitly sets `createUpdaterArtifacts: false`; the Action has no signing preflight or signing-secret bindings.
 
 ## App updates
 
@@ -14,7 +14,7 @@ Standard unsigned builds update inside the app ([ADR-0004](adr/0004-in-app-updat
 
 There is no release-page link. Trust equals a manual download from the Releases page: GitHub's TLS plus the asset digest, no publisher signature. Code: `src-tauri/src/updates.rs`, `src-tauri/src/updates/installer.rs`, `src-tauri/src/desktop_updates.rs`, `src/lib/updater.svelte.ts`, `src/lib/UpdatePanel.svelte`.
 
-Builds compiled with an updater public key (`REPOWATCH_UPDATER_PUBLIC_KEY`, separately configured) use the Tauri updater behind the same `install_update` command and verify its signature; the plugin passes the launch arguments on (`/ARGS`). The standard Release Action generates no signed updater artifacts and publishes no `latest.json`, so the built-in signed feed (`releases/latest/download/latest.json`) currently resolves to nothing. Once signing is introduced, signed builds need a dedicated feed URL that serves only signed manifests.
+Builds compiled with an updater public key (`REPOWATCH_UPDATER_PUBLIC_KEY`, separately configured) use the Tauri updater behind the same `install_update` command and verify its signature; the plugin passes the launch arguments on (`/ARGS`). The standard Desktop Release Action generates no signed updater artifacts and publishes no `latest.json`, so the built-in signed feed (`releases/latest/download/latest.json`) currently resolves to nothing. Once signing is introduced, signed builds need a dedicated feed URL that serves only signed manifests.
 
 A Tauri updater signature and a Windows Authenticode certificate are different mechanisms; neither is needed to publish the standard EXE or to update it in the app.
 
@@ -23,7 +23,7 @@ A Tauri updater signature and a Windows Authenticode certificate are different m
 Two workflows, nothing else:
 
 - **CI** (`.github/workflows/ci.yml`) runs on pull requests. It always runs the frontend job (lint, typecheck, unit/release tests, build, Playwright). The Rust job runs only when the pull request touches `src-tauri/`, `fixtures/`, `rust-toolchain.toml` or `ci.yml`; the Windows job (desktop clippy, Win32 and credential-store tests, release tests on Windows) only when it touches those, `scripts/`, any workflow, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` or `.node-version`. Renamed files count with their old and new path. A new push cancels the pull request's running CI.
-- **Release** (`.github/workflows/release.yml`) starts only by hand: **Actions → Release → Run workflow** on `main` (on any other branch nothing runs). It first runs the complete CI for that exact commit, then builds the unsigned NSIS EXE on Windows and publishes it with a generated changelog covering everything merged since the previous release. Merges never start a release. Releases run one at a time.
+- **Desktop Release** (`.github/workflows/desktop-release.yml`) starts only by hand: **Actions → Desktop Release → Run workflow** on `main` (on any other branch nothing runs). It first runs the complete CI for that exact commit, then builds the unsigned NSIS EXE on Windows and publishes it with a generated changelog covering everything merged since the previous release. Merges never start a release. Releases run one at a time.
 
 Release publication uses the existing repository GITHUB_TOKEN; no additional signing secret is required. Rust caches are separated for Linux core, Windows checks and the release build; only runs on `main` save them.
 

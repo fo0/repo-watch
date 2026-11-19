@@ -8,7 +8,7 @@ Stable project knowledge. **Read at session start.**
 
 - **Date:** 2026-10-31
 - **Context:** Releases must work without signing keys or certificates.
-- **Decision:** The standard _Release_ Action publishes an unsigned NSIS EXE (`createUpdaterArtifacts: false` in `src-tauri/tauri.release.conf.json`). The version is `YYYY.MMDD.HHmm` (UTC) from the immutable run creation time, stamped only into the build workspace — Git keeps `0.1.0`, no bump commit.
+- **Decision:** The standard _Desktop Release_ Action publishes an unsigned NSIS EXE (`createUpdaterArtifacts: false` in `src-tauri/tauri.release.conf.json`). The version is `YYYY.MMDD.HHmm` (UTC) from the immutable run creation time, stamped only into the build workspace — Git keeps `0.1.0`, no bump commit.
 - **Reason:** Retries keep the same version; no secrets beyond `GITHUB_TOKEN`. The Tauri updater stays for separately signed builds; unsigned builds update per ADR-0004. Detail: `docs/RELEASES.md`.
 
 ### Unsigned builds update in the app
@@ -47,15 +47,15 @@ Stable project knowledge. **Read at session start.**
 
 ## Gotchas & Pitfalls
 
-- **Releases are manual only** (owner decision) — _Actions → Release → Run workflow_ on `main` runs `ci.yml` for that commit, then builds and publishes; merges and commit messages never release. Never start one unprompted. (2026-11-01)
+- **Releases are manual only** (owner decision) — _Actions → Desktop Release → Run workflow_ on `main` runs `ci.yml` for that commit, then builds and publishes; merges and commit messages never release. Never start one unprompted. (2026-11-01)
 - **`pnpm lint` is `prettier --check . && eslint .`** — prettier covers Markdown and JSON too; `pnpm check` runs svelte-check on `tsconfig.app.json` and `tsconfig.node.json`. The husky pre-commit hook (`.husky/pre-commit` → lint-staged → `prettier --write --ignore-unknown`, `rustfmt` for `*.rs`) formats staged files; it is installed by the `prepare` script on `pnpm install`. Never `--no-verify`. (2026-11-01)
 - **`--features desktop` is built and tested only on Windows in CI** (Linux/macOS need Tauri system libraries and are unvalidated). Linux Rust checks use `--no-default-features --features network,native-credentials`; Win32 popup tests (`--features desktop --bin repowatch`) run only in the CI Windows job. A Linux Windows-target compile is compilation evidence only. With Tauri's Linux libs installed (`libwebkit2gtk-4.1-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`, `libxdo-dev`), `cargo clippy --features desktop` runs on Linux too — `cfg(windows)` code stays Windows-CI-only. (2026-11-01)
-- **`release:test` skips the workflow tests without PowerShell 7** (`# SKIP Install PowerShell 7`); CI runners have it, a cloud container usually does not — a local pass there does not cover `release.yml`. A portable PowerShell 7 plus `POWERSHELL_EXECUTABLE=<path>/pwsh` runs them for real. (2026-11-01)
+- **`release:test` skips the workflow tests without PowerShell 7** (`# SKIP Install PowerShell 7`); CI runners have it, a cloud container usually does not — a local pass there does not cover `desktop-release.yml`. A portable PowerShell 7 plus `POWERSHELL_EXECUTABLE=<path>/pwsh` runs them for real. (2026-11-01)
 - **gh `--no-refresh` only when the installed gh supports it** — passing it unconditionally broke older gh versions during local-account discovery (`src-tauri/src/local_auth/gh.rs` probes the command help first). (2026-10-31)
 - **Popup dismissal is generation-guarded**: blur hides after 120 ms, every tray gesture/focus/reopen bumps a generation that cancels stale hides — keep that when touching `src-tauri/src/tray_popup.rs` / `popup.rs`. (2026-10-31)
-- **Release git reads run without credentials** — checkouts use `persist-credentials: false`; `git ls-remote`/`fetch` in `release.yml` rely on the repository being public. If it goes private, pass the token explicitly to those steps. (2026-11-01)
+- **Release git reads run without credentials** — checkouts use `persist-credentials: false`; `git ls-remote`/`fetch` in `desktop-release.yml` rely on the repository being public. If it goes private, pass the token explicitly to those steps. (2026-11-01)
 - **PR Checks skip `rust-core` / `windows-desktop` when the PR touches none of their paths** — the `changes` job in `ci.yml` decides; extend its patterns when Rust or release code starts reading files elsewhere (Rust tests already embed `fixtures/`). Release runs always run everything. (2026-11-01)
-- **Every `run:` line of `release.yml` executes in `scripts/release-workflow.test.mjs`** under PowerShell with mocked `gh`, `pnpm`, `cargo`, `rustup` — a new tool in a release step needs a mock there, or the test runs the real one. (2026-11-01)
+- **Every `run:` line of `desktop-release.yml` executes in `scripts/release-workflow.test.mjs`** under PowerShell with mocked `gh`, `pnpm`, `cargo`, `rustup` — a new tool in a release step needs a mock there, or the test runs the real one. (2026-11-01)
 - **Local Playwright in the cloud container** needs `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium-<rev>/chrome-linux64/chrome` (the project pins a newer Playwright than the preinstalled browser); `E2E_PORT` gives each checkout its own dev server. (2026-11-01)
 - **Agent worktrees start from local `main`**, which can be stale — reset a worktree onto the working branch before editing. (2026-11-01)
 - **The SQLite cache is versioned (`PRAGMA user_version`)** — a build refuses a newer schema, so downgrading after a migration fails at startup by design. (2026-11-01)

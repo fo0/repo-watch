@@ -16,7 +16,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const workflow = readFileSync(
-  path.join(root, '.github/workflows/release.yml'),
+  path.join(root, '.github/workflows/desktop-release.yml'),
   'utf8',
 );
 const pwsh = process.env.POWERSHELL_EXECUTABLE || 'pwsh';

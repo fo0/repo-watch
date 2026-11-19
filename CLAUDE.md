@@ -137,7 +137,7 @@ Never committed (where they live: `agent_docs/env-vars.md → Secrets Locations`
 
 ## Deployment
 
-**Trigger:** manual _Release_ on `main` only — runs CI for that commit, then publishes; merges never release · **Pipeline:** `.github/workflows/release.yml`. Agent scope: branches and PRs, **no release** without an explicit user command; merge gate: `/pr merge`. Detail: `docs/RELEASES.md`.
+**Trigger:** manual _Desktop Release_ on `main` only — runs CI for that commit, then publishes; merges never release · **Pipeline:** `.github/workflows/desktop-release.yml`. Agent scope: branches and PRs, **no release** without an explicit user command; merge gate: `/pr merge`. Detail: `docs/RELEASES.md`.
 
 ## Testing
 
