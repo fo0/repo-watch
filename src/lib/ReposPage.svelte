@@ -7,6 +7,7 @@
   import type { Modals } from './modals.svelte';
   import type { Panel } from './panel.svelte';
   import type { repositoryActivity } from './repoActivity';
+  import type { Repo } from './types';
 
   let {
     panel,
@@ -15,6 +16,7 @@
     searching,
     setup,
     onClearQuery,
+    onShowRuns,
   }: {
     /** Starts, favorites and expanded rows come from the panel. */
     panel: Panel;
@@ -30,6 +32,8 @@
     /** The missing account step, shown instead of the list. */
     setup: NextStep | null;
     onClearQuery: () => void;
+    /** Opens the Verlauf with a repository's runs. */
+    onShowRuns: (repo: Repo) => void;
   } = $props();
 
   /** A GitHub App sign-in decides on GitHub which repositories it lists. */
@@ -65,6 +69,7 @@
     demo={panel.demo}
     onNotice={(text, tone) => panel.showNotice(text, tone)}
     onHide={(repo, hidden) => void panel.actions.setHidden(repo, hidden)}
+    {onShowRuns}
   />
 {:else if searching}<EmptyState
     icon="search"

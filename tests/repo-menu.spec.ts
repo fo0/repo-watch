@@ -37,13 +37,16 @@ test.describe('native repository menu', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(item('Letzten Run auf GitHub öffnen')).toBeFocused();
     await page.keyboard.press('ArrowDown');
+    await expect(item('Runs im Verlauf anzeigen')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
     await expect(item('Link kopieren')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(item('Ausblenden')).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await expect(item('Letzten Run auf GitHub öffnen')).toBeFocused();
-    // The menu opens, copies and hides; the tray picks its repositories itself.
-    await expect(menu.getByRole('menuitem')).toHaveCount(3);
+    // The menu opens, lists runs, copies and hides; the tray picks its
+    // repositories itself.
+    await expect(menu.getByRole('menuitem')).toHaveCount(4);
     // Escape closes the menu only, not the page or the search.
     await page.keyboard.press('Escape');
     await expect(menu).toHaveCount(0);
@@ -80,6 +83,34 @@ test.describe('native repository menu', () => {
   });
 });
 
+test('„Runs im Verlauf anzeigen“ opens the Verlauf searching for the repository', async ({
+  page,
+}) => {
+  await openNative(page);
+  const trigger = menuButton(page, 'demo-dev/launch-kit-demo');
+  await trigger.click();
+  await page
+    .getByRole('menu', { name: 'Aktionen für demo-dev/launch-kit-demo' })
+    .getByRole('menuitem', { name: 'Runs im Verlauf anzeigen' })
+    .click();
+  await expectPage(page, 'runs');
+  // The search names the repository, so Esc or its clear button lifts it.
+  await expect(page.locator('.search-field input')).toHaveValue(
+    'demo-dev/launch-kit-demo',
+  );
+  const runs = page.locator('article.run');
+  await expect(runs).toHaveCount(3);
+  for (const id of [8401, 8402, 8405])
+    await expect(runs.filter({ hasText: `#${id}` })).toHaveCount(1);
+  // Unfiltered: completed runs are listed too.
+  await expect(
+    page.getByRole('button', { name: 'Alle', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  // The way back returns focus to the rebuilt overview's „⋯“ button.
+  await page.getByRole('button', { name: 'Zurück zur Übersicht' }).click();
+  await expect(trigger).toBeFocused();
+});
+
 test('a menu whose button scrolls away closes and leaves focus on the button', async ({
   page,
 }) => {
@@ -95,6 +126,10 @@ test('a menu whose button scrolls away closes and leaves focus on the button', a
     name: 'Aktionen für demo-dev/bulk-07-demo',
   });
   await expect(menu.getByRole('menuitem').first()).toBeFocused();
+  // A repository without runs has nothing to show in the Verlauf.
+  await expect(
+    menu.getByRole('menuitem', { name: 'Runs im Verlauf anzeigen' }),
+  ).toHaveCount(0);
   await content.evaluate((node) => (node.scrollTop = 0));
   await expect(menu).toHaveCount(0);
   await expect(trigger).toBeFocused();

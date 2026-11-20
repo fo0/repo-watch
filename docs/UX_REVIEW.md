@@ -20,7 +20,7 @@ Binding rules: [owner UX rules](../agent_docs/ux_rules.md). This page lists the 
 
 - One row each, sorted by latest activity (newest of latest run, last run start and last push; re-sorted on every refresh): `owner/` dimmed, workflow count, status icon and text (**2 aktiv** while several runs are open), **Nur Lesen** or **Kein Zugriff** where starts are not allowed, a strip of the last 8 runs (newest right, empty cells when fewer, a running cell pulses unless reduced motion). The strip is an image with a summarizing accessible name.
 - A disclosure starts with one quiet line: default branch, **Push vor …** (exact time in the tooltip) and **GitHub** at the right end (accessible name „owner/name auf GitHub öffnen“; disabled in the demo); then the workflows: configure, start, heart.
-- **⋯** (also right click or the context-menu key): **Letzten Run auf GitHub öffnen** (only with a valid run link), **Link kopieren** (repository page; disabled in the demo). Same keys as the account menu; stays inside the panel.
+- **⋯** (also right click or the context-menu key): **Letzten Run auf GitHub öffnen** (only with a valid run link), **Runs im Verlauf anzeigen** (only for a shown repository with a run: the Verlauf, filter **Alle**, searching for `owner/name`; the way back focuses the **⋯** button), **Link kopieren** (repository page; disabled in the demo). Same keys as the account menu; stays inside the panel.
 
 **Verlauf**
 

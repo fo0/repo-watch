@@ -9,6 +9,7 @@
   import SectionPage from './SectionPage.svelte';
   import { m } from './i18n/index.svelte';
   import type { Modals } from './modals.svelte';
+  import { fullRepo } from './model';
   import type { Panel } from './panel.svelte';
   import { repositoryActivity } from './repoActivity';
   import { historyRuns, visibleRuns } from './runs';
@@ -210,6 +211,7 @@
           {searching}
           {setup}
           {onClearQuery}
+          onShowRuns={(repo) => void view.showRepoRuns(fullRepo(repo))}
         />
       {/if}
     </section>

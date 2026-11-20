@@ -16,6 +16,7 @@ export const repos = {
     openLastRun: 'Letzten Run auf GitHub öffnen',
     demoRunNoLink: 'Demo-Runs haben keinen GitHub-Link',
     runNoLink: 'Für diesen Run gibt es keinen gültigen GitHub-Link',
+    showRuns: 'Runs im Verlauf anzeigen',
     copyLink: 'Link kopieren',
     copyFailed: 'Link konnte nicht kopiert werden.',
     show: 'Einblenden',

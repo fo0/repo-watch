@@ -111,6 +111,19 @@ describe('PanelView', () => {
     expect(view.page).toBe('overview');
   });
 
+  it('shows a repository’s runs in the unfiltered Verlauf by searching for it', async () => {
+    const { panel, view } = setup();
+    view.query = 'kit';
+    view.filter = 'failed';
+    await view.showRepoRuns('demo-dev/website-demo');
+    expect(view.page).toBe('runs');
+    expect(view.filter).toBe('all');
+    expect(view.query).toBe('demo-dev/website-demo');
+    expect(panel.expandedRun).toBeNull();
+    expect(view.back()).toBe(true);
+    expect(view.page).toBe('overview');
+  });
+
   it('clears only the search when the account changes', async () => {
     const { view } = setup();
     await view.open('repos');

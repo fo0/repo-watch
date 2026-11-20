@@ -17,6 +17,7 @@ export const repos: typeof German = {
     openLastRun: 'Open last run on GitHub',
     demoRunNoLink: 'Demo runs have no GitHub link',
     runNoLink: 'This run has no valid GitHub link',
+    showRuns: 'Show runs in History',
     copyLink: 'Copy link',
     copyFailed: 'Could not copy the link.',
     show: 'Show',
