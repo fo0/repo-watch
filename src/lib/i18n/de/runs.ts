@@ -67,6 +67,9 @@ export const runs = {
       'Seit über 24 h in der Warteschlange – GitHub startet den Run nicht und nimmt keinen Abbruch an. Auf GitHub löschen.',
     open: 'Auf GitHub öffnen',
     copy: 'Link kopieren',
+    /** Opens the start dialog with the run's workflow and branch. */
+    startAgain: 'Erneut starten …',
+    startAgainTitle: 'Startdialog mit diesem Workflow und Branch öffnen',
     noLinkDemo: 'Demo-Runs haben keinen GitHub-Link',
     noLink: 'Für diesen Run gibt es keinen gültigen GitHub-Link',
     copyFailed:

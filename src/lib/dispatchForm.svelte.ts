@@ -63,6 +63,8 @@ export class DispatchForm {
         '',
     );
     if (workflow) this.selectWorkflow(workflow.id);
+    // Only a listed ref can be chosen; otherwise the default stays.
+    if (seed.ref && this.workflow?.refs.includes(seed.ref)) this.ref = seed.ref;
     if (pin) {
       this.selectWorkflow(pin.workflowId);
       this.ref = pin.ref;

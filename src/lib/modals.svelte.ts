@@ -1,7 +1,7 @@
 import type { DispatchSeed, FavoriteMode } from './DispatchDialog.svelte';
 import type { SettingsTab } from './settingsTabs';
 import type { Panel } from './panel.svelte';
-import type { Pin, Workflow } from './types';
+import type { Pin, Run, Workflow } from './types';
 
 /**
  * Opens the Verlauf with the run expanded and focused; `opener` is the
@@ -50,10 +50,22 @@ export class Modals {
     this.settingsTab = initial;
     this.show('settings');
   };
-  openDispatch = (pin?: Pin, workflow?: Workflow, favorite?: FavoriteMode) => {
-    this.dispatchSeed = { pin, workflow, favorite };
+  openDispatch = (
+    pin?: Pin,
+    workflow?: Workflow,
+    favorite?: FavoriteMode,
+    ref?: string,
+  ) => {
+    this.dispatchSeed = { pin, workflow, favorite, ref };
     this.show('dispatch');
   };
+  /**
+   * „Erneut starten …“ on a run: the start dialog with its workflow and
+   * branch and the workflow's default inputs. Nothing starts until the user
+   * presses the start button there.
+   */
+  startAgain = (workflow: Workflow, run: Run) =>
+    this.openDispatch(undefined, workflow, undefined, run.branch);
   /** Opens a favorite in the start dialog to edit its defaults. */
   editPin = (pin: Pin) => this.openDispatch(pin, undefined, 'edit');
   /** Starts a favorite at once; one that still needs input opens the dialog. */

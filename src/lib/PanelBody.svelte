@@ -14,6 +14,7 @@
   import { historyRuns, visibleRuns } from './runs';
   import { matchesTerms, searchTerms } from './search';
   import { pageTitle, type PanelView } from './view.svelte';
+  import type { Run } from './types';
 
   let {
     panel,
@@ -56,6 +57,21 @@
   );
   const count = (filter: 'active' | 'failed') =>
     data ? visibleRuns(data, accountId, '', filter).length : 0;
+  /**
+   * The run's workflow when it can be started again: still listed, started
+   * by dispatch and in a repository with write access.
+   */
+  const startable = (run: Run) =>
+    panel.repos.some(
+      (repo) => repo.id === run.repoId && repo.permission === 'write',
+    )
+      ? snapshot?.workflows.find(
+          (workflow) =>
+            workflow.repoId === run.repoId &&
+            workflow.id === run.workflowId &&
+            workflow.dispatch,
+        )
+      : undefined;
   const pins = $derived.by(() => {
     const terms = searchTerms(query);
     return (
@@ -165,6 +181,11 @@
           canCancel={panel.canCancel}
           isCancelling={panel.actions.isCancelling}
           onCancel={(run) => void panel.actions.cancelRun(run)}
+          canStartAgain={(run) => !!startable(run)}
+          onStartAgain={(run) => {
+            const workflow = startable(run);
+            if (workflow) modals.startAgain(workflow, run);
+          }}
           onFilter={(next) => (view.filter = next)}
           onToggle={panel.toggleRun}
           {onClearQuery}

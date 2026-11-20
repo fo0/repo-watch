@@ -36,6 +36,8 @@
     canCancel = () => false,
     isCancelling = () => false,
     onCancel = () => {},
+    canStartAgain = () => false,
+    onStartAgain = () => {},
     onFilter,
     onToggle,
     onClearQuery,
@@ -58,6 +60,10 @@
     canCancel?: (run: Run) => boolean;
     isCancelling?: (run: Run) => boolean;
     onCancel?: (run: Run) => void;
+    /** Its workflow can be started again: dispatchable, with write access. */
+    canStartAgain?: (run: Run) => boolean;
+    /** Opens the start dialog with the run's workflow and branch. */
+    onStartAgain?: (run: Run) => void;
     onFilter: (filter: ActivityFilter) => void;
     onToggle: (runId: number) => void;
     onClearQuery: () => void;
@@ -171,6 +177,8 @@
         canCancel={canCancel(run)}
         cancelling={isCancelling(run)}
         onCancel={() => onCancel(run)}
+        canStartAgain={canStartAgain(run)}
+        onStartAgain={() => onStartAgain(run)}
         onToggle={() => onToggle(run.id)}
         {onNotice}
       />
