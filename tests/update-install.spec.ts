@@ -282,6 +282,8 @@ test('„Nach Updates suchen“ keeps focus while the check runs', async ({
   await page.getByRole('tab', { name: /^Updates/ }).click();
   const panel = page.getByRole('region', { name: 'App-Update' });
   const check = panel.getByRole('button', { name: 'Nach Updates suchen' });
+  // The startup check has settled, so the press below starts the only check.
+  await expect(check).not.toHaveAttribute('aria-disabled');
   const before = (await readCalls(page, 'check_update')).length;
   await check.focus();
   await page.keyboard.press('Enter');
