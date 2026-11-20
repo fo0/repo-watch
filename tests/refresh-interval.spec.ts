@@ -43,9 +43,11 @@ test('the refresh interval stages on the slider or as an own value and applies o
   // An own value outside 15–3600 s blocks saving and names the range.
   await custom(page).fill('5');
   await expect(custom(page)).toHaveAttribute('aria-invalid', 'true');
-  await expect(dialog(page)).toContainText(
+  // The error line is announced while focus stays in the field.
+  await expect(dialog(page).getByRole('alert')).toHaveText(
     'Aktualisierung muss zwischen 15 s und 60 min liegen.',
   );
+  await expect(custom(page)).toBeFocused();
   await expect(save(page)).toBeDisabled();
   // From another tab, the App tab's marker and the tooltip name the cause.
   const app = dialog(page).getByRole('tab', { name: 'App' });

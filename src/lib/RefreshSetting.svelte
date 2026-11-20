@@ -68,7 +68,8 @@
     />
     <span aria-hidden="true">s</span>
   </label>
-  {#if !valid}<p id="refresh-error" class="refresh-error">
+  <!-- Announced as it appears: focus stays in the field being typed in. -->
+  {#if !valid}<p id="refresh-error" class="refresh-error" role="alert">
       {refreshError()}
     </p>{/if}
 </section>
