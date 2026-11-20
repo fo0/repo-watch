@@ -48,12 +48,13 @@
           >{m().updates.lastChecked(clockTime(checkedAt))}</span
         >{/if}
     </div>
-    <!-- The icon spins while the check runs, like the app bar's refresh. -->
+    <!-- The icon spins while the check runs, like the app bar's refresh.
+         Off via aria-disabled: a pressed check keeps focus here. -->
     {#if native}<button
         class="secondary-button"
         class:spinning={phase === 'checking'}
-        disabled={busy}
-        onclick={onCheck}
+        aria-disabled={busy ? 'true' : undefined}
+        onclick={() => !busy && onCheck()}
         ><Icon name="refresh" size={14} />{m().updates.check}</button
       >{/if}
   </div>

@@ -15,6 +15,8 @@ type UpdateMock = {
   installFail: boolean;
   total: number | null;
   stageDelay: number;
+  /** Holds `check_update` in flight, like a slow network. */
+  checkDelay: number;
 };
 let mock: TauriMock<UpdateMock>;
 
@@ -54,6 +56,10 @@ test.beforeEach(async ({ page }) => {
         if (cmd === 'snapshot' || cmd === 'refresh_snapshot')
           return structuredClone(snapshot);
         if (cmd === 'check_update') {
+          if (state.checkDelay)
+            await new Promise((resolve) =>
+              setTimeout(resolve, state.checkDelay),
+            );
           if (state.checkFail)
             throw 'Update-Prüfung fehlgeschlagen – Verbindung prüfen.';
           return state.current
@@ -98,6 +104,7 @@ test.beforeEach(async ({ page }) => {
         installFail: false,
         total: 10_000_000,
         stageDelay: 600,
+        checkDelay: 0,
       },
     },
   );
@@ -263,4 +270,27 @@ test('the banner closes for this version and returns for a newer one', async ({
   ).toBeVisible();
   await page.getByRole('button', { name: 'Dialog schließen' }).click();
   await expect(page.getByText('Update 2026.1101.1000 verfügbar')).toBeVisible();
+});
+
+test('„Nach Updates suchen“ keeps focus while the check runs', async ({
+  page,
+}) => {
+  await mock.configure({ current: true, checkDelay: 400 });
+  await page
+    .getByRole('button', { name: 'Einstellungen', exact: true })
+    .click();
+  await page.getByRole('tab', { name: /^Updates/ }).click();
+  const panel = page.getByRole('region', { name: 'App-Update' });
+  const check = panel.getByRole('button', { name: 'Nach Updates suchen' });
+  const before = (await readCalls(page, 'check_update')).length;
+  await check.focus();
+  await page.keyboard.press('Enter');
+  await expect(check).toHaveAttribute('aria-disabled', 'true');
+  await expect(check).toBeFocused();
+  // A press while the check runs sends no second check.
+  await page.keyboard.press('Enter');
+  await expect(panel.getByText('Aktuell.', { exact: true })).toBeVisible();
+  await expect(check).not.toHaveAttribute('aria-disabled');
+  await expect(check).toBeFocused();
+  expect(await readCalls(page, 'check_update')).toHaveLength(before + 1);
 });
