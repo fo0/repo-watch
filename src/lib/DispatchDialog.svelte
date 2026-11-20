@@ -12,6 +12,8 @@
     pin?: Pin | undefined;
     workflow?: Workflow | undefined;
     favorite?: FavoriteMode | undefined;
+    /** Preselected branch or tag, e.g. a run's; used when the workflow lists it. */
+    ref?: string | undefined;
   }
 </script>
 

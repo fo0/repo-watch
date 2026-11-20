@@ -142,6 +142,18 @@ export class PanelView {
     focusRevealedRun();
   };
 
+  /**
+   * „Runs im Verlauf anzeigen“ in a repository's „⋯“ menu: the full
+   * Verlauf, unfiltered, searching for the repository's `owner/name`. The
+   * query stays visible in the search field, so Esc or its clear button
+   * lifts it as after any search.
+   */
+  showRepoRuns = (name: string) => {
+    this.filter = 'all';
+    this.query = name;
+    return this.open('runs');
+  };
+
   /** Stores the opener: the given one, else the focused element. */
   #remember(opener: HTMLElement | null | undefined) {
     const dom = hasDom();

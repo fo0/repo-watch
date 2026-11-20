@@ -18,6 +18,7 @@
   import SectionHeader from './SectionHeader.svelte';
   import { m } from './i18n/index.svelte';
   import type { Modals } from './modals.svelte';
+  import { fullRepo } from './model';
   import type { Panel } from './panel.svelte';
   import { lastRun, type repositoryActivity } from './repoActivity';
   import type { Pin, Run } from './types';
@@ -167,6 +168,7 @@
         demo={panel.demo}
         onNotice={(text, tone) => panel.showNotice(text, tone)}
         onHide={(repo, hidden) => void panel.actions.setHidden(repo, hidden)}
+        onShowRuns={(repo) => void view.showRepoRuns(fullRepo(repo))}
       />{:else}<p class="section-empty">
         {searching
           ? m().shell.overview.noRepoMatches
