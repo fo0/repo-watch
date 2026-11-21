@@ -126,6 +126,53 @@ test('an off save button names why in its tooltip', async ({ page }) => {
   ).toBeFocused();
 });
 
+test('saving a favorite keeps its section open and focus off <body>', async ({
+  page,
+}) => {
+  const dialog = await openLaunch(page);
+  // Opened by the user: closed by default in a plain start dialog.
+  const section = dialog.locator('details.save-pin');
+  await expect(section).not.toHaveAttribute('open');
+  await dialog.getByText('Als Favorit speichern', { exact: true }).click();
+  const name = dialog.getByLabel('Name des Favoriten');
+  await name.fill('Focus build');
+  await dialog
+    .getByRole('button', { name: 'Favorit speichern', exact: true })
+    .click();
+  await expect(
+    dialog.getByText('„Focus build“ als Favorit gespeichert.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(section).toHaveAttribute('open');
+  await expect(
+    dialog.getByRole('button', { name: 'Favorit aktualisieren', exact: true }),
+  ).toBeFocused();
+  // Enter in the name saves again; the caret stays in the field.
+  await name.fill('Focus build 2');
+  await name.press('Enter');
+  await expect(
+    dialog.getByText('„Focus build 2“ als Favorit gespeichert.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(section).toHaveAttribute('open');
+  await expect(name).toBeFocused();
+  // „Als neuen Favoriten speichern“ keeps focus on itself.
+  const asNew = dialog.getByRole('button', {
+    name: 'Als neuen Favoriten speichern',
+  });
+  await name.fill('Focus build 3');
+  await asNew.click();
+  await expect(
+    dialog.getByText('„Focus build 3“ als Favorit gespeichert.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(section).toHaveAttribute('open');
+  await expect(asNew).toBeFocused();
+});
+
 test('saving is blocked during dispatch and the result still appears', async ({
   page,
 }) => {
