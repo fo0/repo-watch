@@ -296,3 +296,29 @@ test('„Nach Updates suchen“ keeps focus while the check runs', async ({
   await expect(check).toBeFocused();
   expect(await readCalls(page, 'check_update')).toHaveLength(before + 1);
 });
+
+test('„Installieren“ hands focus to the progress, a failure back to „Erneut versuchen“', async ({
+  page,
+}) => {
+  await mock.configure({ installFail: true, stageDelay: 1500 });
+  await page.getByRole('button', { name: 'Ansehen', exact: true }).click();
+  const panel = page.getByRole('region', { name: 'App-Update' });
+  await panel
+    .getByRole('button', { name: 'Installieren', exact: true })
+    .focus();
+  await page.keyboard.press('Enter');
+  // The pressed button is gone; focus is on the named progress area, not
+  // on <body>, and stays there from download to check.
+  const progress = panel.getByRole('group', {
+    name: 'Installationsfortschritt',
+  });
+  await expect(progress.getByRole('progressbar')).toBeVisible();
+  await expect(progress).toBeFocused();
+  await expect(progress.getByText('Wird geprüft …')).toBeVisible();
+  await expect(progress).toBeFocused();
+  // The failed install brings the button back as the retry, with focus.
+  await expect(panel.getByRole('alert')).toBeVisible();
+  await expect(
+    panel.getByRole('button', { name: 'Erneut versuchen' }),
+  ).toBeFocused();
+});
