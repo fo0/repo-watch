@@ -94,6 +94,38 @@ test('Enter in a template name saves it without starting a run', async ({
   await expect(page.getByText(/9001/)).toHaveCount(0);
 });
 
+test('an off save button names why in its tooltip', async ({ page }) => {
+  const dialog = await openLaunch(page);
+  await dialog.getByText('Als Favorit speichern', { exact: true }).click();
+  const save = dialog.getByRole('button', {
+    name: 'Favorit speichern',
+    exact: true,
+  });
+  // The name starts as the workflow's; an emptied name turns the save off.
+  const name = dialog.getByLabel('Name des Favoriten');
+  await expect(name).not.toHaveValue('');
+  await expect(save).not.toHaveAttribute('aria-disabled');
+  await name.fill('');
+  await expect(save).toHaveAttribute('aria-disabled', 'true');
+  await expect(save).toHaveAttribute('title', 'Name fehlt');
+  // Off, a press keeps focus on the button and saves nothing.
+  await save.focus();
+  await page.keyboard.press('Enter');
+  await expect(save).toBeFocused();
+  await expect(dialog.getByText(/als Favorit gespeichert\./)).toHaveCount(0);
+  await name.fill('Named build');
+  await expect(save).not.toHaveAttribute('aria-disabled');
+  await expect(save).not.toHaveAttribute('title');
+  await save.click();
+  await expect(
+    dialog.getByText('„Named build“ als Favorit gespeichert.', { exact: true }),
+  ).toBeVisible();
+  // The save is done in place; focus stays on its button.
+  await expect(
+    dialog.getByRole('button', { name: 'Favorit aktualisieren', exact: true }),
+  ).toBeFocused();
+});
+
 test('saving is blocked during dispatch and the result still appears', async ({
   page,
 }) => {
@@ -112,7 +144,8 @@ test('saving is blocked during dispatch and the result still appears', async ({
     )!;
     start.click();
     await new Promise<void>((resolve) => queueMicrotask(resolve));
-    const disabled = save.disabled;
+    // Off via aria-disabled, so a pressed save keeps focus; the click is ignored.
+    const disabled = save.getAttribute('aria-disabled') === 'true';
     save.click();
     return disabled;
   });

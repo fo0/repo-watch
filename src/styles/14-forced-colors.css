@@ -77,13 +77,14 @@
     color: GrayText;
   }
   /* Controls off via aria-disabled (a running refresh, status check,
-     update check or favorite change) keep focus but get no system grey. */
+     update check, favorite change or save) keep focus but get no system grey. */
   .app-bar .icon-button[aria-disabled='true'],
   .app-footer > button[aria-disabled='true'],
   .text-button[aria-disabled='true'],
   .startup-actions .secondary-button[aria-disabled='true'],
   .update-panel .secondary-button[aria-disabled='true'],
   .favorite-button[aria-disabled='true'],
+  .save-pin .secondary-button[aria-disabled='true'],
   .pin-row .pin-heart[aria-disabled='true'] {
     color: GrayText;
   }

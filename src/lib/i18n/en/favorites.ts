@@ -32,6 +32,8 @@ export const favorites: typeof German = {
     update: 'Update favorite',
     save: 'Save favorite',
     saveAsNew: 'Save as new favorite',
+    incomplete: 'Inputs incomplete',
+    nameMissing: 'Name missing',
   },
   notices: {
     saved: (label: string) => `“${label}” saved as a favorite.`,
