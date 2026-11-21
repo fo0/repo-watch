@@ -88,6 +88,10 @@ test('Settings → App shows a hidden repository again only with „Speichern“
     exact: true,
   });
   await expect(show).toHaveAttribute('aria-pressed', 'false');
+  // The owner is shown too, as in the repository rows.
+  await expect(hiddenSection(page).locator('.hidden-name')).toHaveText(
+    'example-org/runner-tools-demo',
+  );
   const save = dialog(page).getByRole('button', {
     name: 'Speichern',
     exact: true,

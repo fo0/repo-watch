@@ -302,11 +302,20 @@
   min-height: 36px;
 }
 .hidden-name {
+  display: flex;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--font-size-meta);
+}
+/* Owner, slash and name as in `.repository-name` (11-repository-browser.css). */
+.hidden-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The name here is not bold, so the dimmed owner keeps the row's weight. */
+.hidden-name .repository-owner,
+.hidden-name .repository-slash {
+  font-weight: inherit;
 }
 .hidden-row.staged .hidden-name {
   color: var(--text-2);

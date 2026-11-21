@@ -35,6 +35,9 @@ export const favorites = {
     update: 'Favorit aktualisieren',
     save: 'Favorit speichern',
     saveAsNew: 'Als neuen Favoriten speichern',
+    /** Tooltips of the off save buttons. */
+    incomplete: 'Eingaben unvollständig',
+    nameMissing: 'Name fehlt',
   },
   notices: {
     saved: (label: string) => `„${label}“ als Favorit gespeichert.`,
