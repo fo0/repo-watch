@@ -166,7 +166,8 @@ for (const width of [360, 480]) {
         };
       }),
     );
-    expect(layout.map((item) => item.actions)).toEqual([0, 2]);
+    // Expanded 8405: open, copy and „Erneut starten …“ (write access).
+    expect(layout.map((item) => item.actions)).toEqual([0, 3]);
     for (const item of layout) {
       expect(item.rowHeight).toBeLessThanOrEqual(79);
       expect(item.sideInside).toBe(true);

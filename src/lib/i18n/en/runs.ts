@@ -62,6 +62,8 @@ export const runs: typeof German = {
       'Queued for more than 24 h – GitHub will not start the run and refuses to cancel it. Delete it on GitHub.',
     open: 'Open on GitHub',
     copy: 'Copy link',
+    startAgain: 'Start again …',
+    startAgainTitle: 'Open the start dialog with this workflow and branch',
     noLinkDemo: 'Demo runs have no GitHub link',
     noLink: 'This run has no valid GitHub link',
     copyFailed:

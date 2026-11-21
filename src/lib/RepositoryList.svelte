@@ -29,6 +29,7 @@
     demo,
     onNotice,
     onHide,
+    onShowRuns,
   }: {
     groups: ReturnType<typeof repositoryActivity>;
     onopen: (workflow: Workflow) => void;
@@ -54,6 +55,8 @@
     onNotice: (text: string, tone: NoticeTone) => void;
     /** Hides a repository from the lists, or shows a hidden one again. */
     onHide: (repo: Repo, hidden: boolean) => void;
+    /** Opens the Verlauf with a repository's runs. */
+    onShowRuns: (repo: Repo) => void;
   } = $props();
 </script>
 
@@ -161,6 +164,7 @@
           {demo}
           {onNotice}
           onHide={(hidden) => onHide(group.repo, hidden)}
+          onShowRuns={() => onShowRuns(group.repo)}
         />
       </div>
       <div

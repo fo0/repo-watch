@@ -16,6 +16,7 @@
     demo,
     onNotice,
     onHide,
+    onShowRuns,
   }: {
     repo: Repo;
     /** The repository's latest run, if any. */
@@ -28,6 +29,8 @@
     onNotice: (text: string, tone: NoticeTone) => void;
     /** Hides the repository (true) or shows it again (false), at once. */
     onHide: (hidden: boolean) => void;
+    /** Opens the Verlauf with this repository's runs. */
+    onShowRuns: () => void;
   } = $props();
 
   const id = $props.id();
@@ -153,6 +156,7 @@
     aria-controls={open ? `${id}-menu` : undefined}
     aria-label={m().repos.menu.actionsFor(name)}
     title={m().repos.menu.actionsTitle}
+    data-focus-key={`repo-menu:${repo.id}`}
     onclick={() => (open ? (open = false) : show('first'))}
     onkeydown={onTriggerKey}><Icon name="more" size={16} /></button
   >
@@ -193,6 +197,15 @@
             ><Icon name="external" size={16} />{m().repos.menu
               .openLastRun}</button
           >{/if}{/if}
+      <!-- Only a shown repository has runs in the Verlauf (ADR-0008). -->
+      {#if latest && repo.selected && !hidden}<button
+          type="button"
+          class="menu-item"
+          role="menuitem"
+          tabindex="-1"
+          onclick={() => run(onShowRuns)}
+          ><Icon name="activity" size={16} />{m().repos.menu.showRuns}</button
+        >{/if}
       <button
         type="button"
         class="menu-item"

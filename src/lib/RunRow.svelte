@@ -28,6 +28,8 @@
     canCancel = false,
     cancelling = false,
     onCancel,
+    canStartAgain = false,
+    onStartAgain,
     onToggle,
     onNotice,
   }: {
@@ -46,6 +48,9 @@
     /** A cancel request is pending or accepted; the run is still open. */
     cancelling?: boolean;
     onCancel?: () => void;
+    /** Its workflow can be started again: the details offer „Erneut starten …“. */
+    canStartAgain?: boolean;
+    onStartAgain?: () => void;
     onToggle: () => void;
     /** Panel banner for link results: copied, or why opening/copying failed. */
     onNotice: (text: string, tone: NoticeTone) => void;
@@ -144,7 +149,12 @@
           title={runUrl ? undefined : noLink}
           onclick={() => void copy()}
           ><Icon name="copy" size={13} />{text.copy}</button
-        >{#if canCancel}<button
+        >{#if canStartAgain}<button
+            class="secondary-button compact run-again"
+            title={text.startAgainTitle}
+            onclick={() => onStartAgain?.()}
+            ><Icon name="play" size={13} />{text.startAgain}</button
+          >{/if}{#if canCancel}<button
             class="secondary-button compact run-cancel"
             class:armed={confirm.is(true)}
             aria-disabled={cancelling ? 'true' : undefined}
