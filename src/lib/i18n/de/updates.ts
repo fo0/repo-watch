@@ -12,4 +12,6 @@ export const updates = {
   verifying: 'Wird geprüft …',
   installing: 'Wird installiert – RepoWatch startet neu …',
   install: 'Installieren',
+  /** Accessible name of the progress area that takes focus from „Installieren“. */
+  progress: 'Installationsfortschritt',
 };

@@ -38,6 +38,40 @@
   );
   const published = $derived(info ? releaseDate(info.date) : '');
   const bullets = $derived(info ? changelogSummary(info.notes) : []);
+
+  /** Download, check and install: one area that replaces „Installieren“. */
+  let progressArea = $state<HTMLElement>();
+  let installButton = $state<HTMLButtonElement>();
+  /** „Installieren“ was pressed; its progress area takes the focus. */
+  let follow = false;
+  /** The progress area held the focus when it went; the retry takes it. */
+  let refocus = $state(false);
+  /** Focus fell to <body>, e.g. with a removed element. */
+  const focusLost = () =>
+    !document.activeElement || document.activeElement === document.body;
+  // The pressed button is replaced, so focus would fall to <body> (WCAG
+  // 2.4.3): it moves to the progress area, and back to the button when a
+  // failed install brings it back as „Erneut versuchen“.
+  $effect(() => {
+    const area = progressArea;
+    if (!area) return;
+    if (follow) {
+      follow = false;
+      area.focus();
+    }
+    return () => {
+      if (area.contains(document.activeElement) || focusLost()) refocus = true;
+    };
+  });
+  $effect(() => {
+    if (!installButton || !refocus) return;
+    refocus = false;
+    if (focusLost()) installButton.focus();
+  });
+  function install() {
+    follow = true;
+    onInstall();
+  }
 </script>
 
 <section class="update-panel" aria-label={m().updates.label}>
@@ -76,31 +110,47 @@
         >
           {#each bullets as bullet, index (index)}<li>{bullet}</li>{/each}
         </ul>{/if}
-      {#if phase === 'downloading'}
-        <div class="update-progress" role="status">
-          <label for="update-download"
-            >{m().updates.downloading}{percent === undefined
-              ? ''
-              : ` ${percent} %`}</label
-          >
-          {#if percent === undefined}<progress id="update-download"
-            ></progress>{:else}<progress
-              id="update-download"
-              max="100"
-              value={percent}
-            ></progress>{/if}
+      {#if phase === 'downloading' || phase === 'verifying' || phase === 'installing'}
+        <!-- One element through all three stages, so the focus moved here
+             from „Installieren“ stays until the app restarts. -->
+        <div
+          class="update-step"
+          role="group"
+          tabindex="-1"
+          aria-label={m().updates.progress}
+          bind:this={progressArea}
+        >
+          {#if phase === 'downloading'}
+            <div class="update-progress" role="status">
+              <label for="update-download"
+                >{m().updates.downloading}{percent === undefined
+                  ? ''
+                  : ` ${percent} %`}</label
+              >
+              {#if percent === undefined}<progress id="update-download"
+                ></progress>{:else}<progress
+                  id="update-download"
+                  max="100"
+                  value={percent}
+                ></progress>{/if}
+            </div>
+          {:else if phase === 'verifying'}
+            <p class="update-line" role="status">{m().updates.verifying}</p>
+          {:else}
+            <p class="update-line" role="status">
+              {m().updates.installing}
+            </p>
+          {/if}
         </div>
-      {:else if phase === 'verifying'}
-        <p class="update-line" role="status">{m().updates.verifying}</p>
-      {:else if phase === 'installing'}
-        <p class="update-line" role="status">
-          {m().updates.installing}
-        </p>
       {:else}
         {#if error}<div class="alert danger" role="alert">
             <Icon name="warning" size={14} /><span>{error}</span>
           </div>{/if}
-        <button class="primary-button" disabled={busy} onclick={onInstall}
+        <button
+          class="primary-button"
+          disabled={busy}
+          onclick={install}
+          bind:this={installButton}
           >{error ? m().common.retry : m().updates.install}</button
         >
       {/if}

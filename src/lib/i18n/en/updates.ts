@@ -14,4 +14,5 @@ export const updates: typeof German = {
   verifying: 'Verifying…',
   installing: 'Installing – RepoWatch restarts…',
   install: 'Install',
+  progress: 'Installation progress',
 };

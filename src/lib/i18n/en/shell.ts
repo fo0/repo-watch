@@ -102,6 +102,8 @@ export const shell: typeof German = {
   refreshed: (demo: boolean) =>
     demo ? 'Demo status refreshed.' : 'GitHub status refreshed.',
   demoReset: 'Demo reset.',
+  searchResults: (n: number) =>
+    n === 0 ? 'No results' : n === 1 ? '1 result' : `${n} results`,
   shortcuts: [
     'Keyboard shortcuts',
     '/ or Ctrl+F – Search',
