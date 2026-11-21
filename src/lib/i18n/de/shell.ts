@@ -102,6 +102,9 @@ export const shell = {
   refreshed: (demo: boolean): string =>
     demo ? 'Demo-Status aktualisiert.' : 'GitHub-Status aktualisiert.',
   demoReset: 'Demo zurückgesetzt.',
+  /** Announced (visually hidden) once a search settles. */
+  searchResults: (n: number) =>
+    n === 0 ? 'Keine Treffer' : n === 1 ? '1 Treffer' : `${n} Treffer`,
   /** The „Tastenkürzel“ tooltip, one shortcut per line. */
   shortcuts: [
     'Tastenkürzel',

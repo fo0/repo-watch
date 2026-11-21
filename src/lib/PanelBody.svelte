@@ -6,6 +6,7 @@
   import Icon from './Icon.svelte';
   import Overview from './Overview.svelte';
   import ReposPage from './ReposPage.svelte';
+  import SearchAnnouncer from './SearchAnnouncer.svelte';
   import SectionPage from './SectionPage.svelte';
   import { m } from './i18n/index.svelte';
   import type { Modals } from './modals.svelte';
@@ -194,3 +195,16 @@
     </section>
   {/if}
 </div>
+<!-- The result count of a settled search, for screen readers only. -->
+<SearchAnnouncer
+  query={searching && snapshot && !setup
+    ? `${view.page}|${view.filter}|${query.trim()}`
+    : ''}
+  count={view.page === 'overview'
+    ? live.length + pins.length + groups.length
+    : view.page === 'runs'
+      ? runs.length
+      : view.page === 'favorites'
+        ? pins.length
+        : groups.length}
+/>
