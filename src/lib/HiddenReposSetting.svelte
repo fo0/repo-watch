@@ -21,11 +21,15 @@
   {#if entries.length}<ul class="hidden-list">
       {#each entries as entry (hiddenKey(entry.accountId, entry.repoId))}
         {@const staged = choice.has(entry)}
+        <!-- `owner/` dimmed as in the repository rows, so a fork and its
+             upstream stay apart; the owner gives way first. -->
         <li class="hidden-row" class:staged>
           <span
             class="hidden-name"
             title={`${entry.owner}/${entry.name} · ${login(entry.accountId)}`}
-            >{entry.name}</span
+            ><span class="repository-owner">{entry.owner}</span><span
+              class="repository-slash">/</span
+            ><span class="repository-short">{entry.name}</span></span
           ><button
             type="button"
             class="secondary-button compact"
