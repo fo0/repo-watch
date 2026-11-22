@@ -150,6 +150,7 @@ impl<T: Transport> ApiClient<T> {
     ) -> Result<Pages, ApiError> {
         let mut state = self.state.lock().map_err(|_| ApiError::QueueUnavailable)?;
         let first_path = first.path().to_owned();
+        let mut alias = None;
         let mut next = Some(first);
         let mut seen = BTreeSet::new();
         let mut pages = Pages::default();
@@ -158,7 +159,7 @@ impl<T: Transport> ApiClient<T> {
                 pages.truncated = true;
                 break;
             }
-            if !seen.insert(url.clone()) || url.path() != first_path {
+            if !seen.insert(url.clone()) || !same_resource(&first_path, url.path(), &mut alias) {
                 return Err(ApiError::Policy(tr(
                     "GitHub-Seitenfolge verlässt die angefragte Ressource.",
                     "GitHub paging leaves the requested resource.",
@@ -199,7 +200,7 @@ impl<T: Transport> ApiClient<T> {
             if page
                 .next
                 .as_ref()
-                .is_some_and(|next| next.path() != first_path)
+                .is_some_and(|next| !same_resource(&first_path, next.path(), &mut alias))
             {
                 return Err(ApiError::Policy(tr(
                     "GitHub-Seitenfolge wechselt die Ressource.",
@@ -367,6 +368,41 @@ fn throttled<T>(
         .map(|retry_at| ApiError::RateLimited {
             retry_at: *retry_at,
         })
+}
+
+/// Whether `path` pages the same resource as `first`: `first` itself or, for a
+/// `/repos/{owner}/{repo}/<rest>` listing, GitHub's numeric alias `/repositories/{id}/<rest>`.
+/// The first alias accepted is pinned, so one traversal never switches between ids.
+fn same_resource(first: &str, path: &str, alias: &mut Option<String>) -> bool {
+    if path == first {
+        return true;
+    }
+    if let Some(alias) = alias.as_deref() {
+        return path == alias;
+    }
+    let rest = first
+        .strip_prefix("/repos/")
+        .and_then(|tail| {
+            let mut parts = tail.splitn(3, '/');
+            match (parts.next(), parts.next(), parts.next()) {
+                (Some(owner), Some(repo), Some(rest)) if !owner.is_empty() && !repo.is_empty() => {
+                    Some(rest)
+                }
+                _ => None,
+            }
+        })
+        .filter(|rest| !rest.is_empty());
+    let accepted = rest.is_some_and(|rest| {
+        path.strip_prefix("/repositories/")
+            .and_then(|tail| tail.split_once('/'))
+            .is_some_and(|(id, tail)| {
+                !id.is_empty() && id.bytes().all(|byte| byte.is_ascii_digit()) && tail == rest
+            })
+    });
+    if accepted {
+        *alias = Some(path.to_owned());
+    }
+    accepted
 }
 
 fn checked_etag(value: Option<&str>) -> Result<Option<String>, ApiError> {
