@@ -38,6 +38,12 @@ Stable project knowledge. **Read at session start.**
 - **Date:** 2026-11-04
 - **Decision (owner, #34):** Settings → App „Sprache“: System (default, `navigator.languages` → German for German, English otherwise), Deutsch, English; staged, stored in `localStorage` like the theme. Panel texts live in typed per-area catalogs (`src/lib/i18n/{de,en}/`, read via `m()` at render time — never in module-level constants); the panel reports the resolved language to Rust via `set_locale`, which picks native texts with `i18n::tr` / `trf!` and relabels the tray. Tests run German (Playwright `locale: 'de-DE'`). [ADR-0009](docs/adr/0009-app-language.md).
 
+### A local log file, written without a logging dependency
+
+- **Date:** 2026-11-22
+- **Decision (owner request, #96):** `src-tauri/src/app_log.rs` writes `logs/repowatch.log` under the app data directory (1 MiB, one predecessor), level info by default, debug via Settings → App „Protokoll“ (`AppSettings.log_level`); the folder opens from there and from the tray menu. Every line passes one sanitiser; only method, URL path, status, duration, logins, `owner/repo` and user-facing error text are logged — never headers, bodies, ETags or tokens. A lasting refresh failure is logged once (`FailureLog`).
+- **Reason:** std-only because new runtime dependencies need owner approval.
+
 ### Browser / GitHub App sign-in is paused
 
 - **Date:** 2026-10-31
@@ -64,6 +70,7 @@ Stable project knowledge. **Read at session start.**
 
 ## External Dependencies
 
+- **GitHub paging may switch to `repositories/{id}/…`** for a `repos/{owner}/{repo}/…` listing; `same_resource` in `github/client.rs` follows that alias (one id per traversal). Unauthenticated requests echo the requested path, so it does not reproduce without a token. (2026-11-22)
 - **GitHub REST `2026-03-10`** — dispatch responses include the exact run ID; a legacy 204, timeout or malformed response stays _uncertain_ and is quarantined, never re-sent. (2026-10-31)
 - **gh CLI / Git Credential Manager** — gh accounts are imported only after explicit consent (`auth token --user <login>`); GCM is metadata-only, never `git credential fill`. Child processes get a minimal env, closed stdin, 64 KiB output and 20 s caps. (2026-10-31)
 - **Credential namespaces** — PAT `github-<id>`, imported gh `github-gh-<id>`, device flow `github-device-<id>`; one GitHub user can have several distinct connections. (2026-10-31)

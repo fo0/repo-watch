@@ -179,6 +179,8 @@ pub struct LiveStore<T: Transport = HttpTransport> {
     refresh_seconds: u64,
     /// Repositories the user hid (`AppSettings::hidden_repos`), kept in step on save.
     hidden: Vec<HiddenRepo>,
+    /// The failing scopes last written to the log, so a lasting failure is logged once.
+    failure_log: crate::app_log::FailureLog,
 }
 impl LiveStore<HttpTransport> {
     pub fn new(cache: Cache, keyring: Arc<dyn NativeKeyring>) -> Result<Self, String> {
@@ -253,6 +255,7 @@ impl<T: Transport> LiveStore<T> {
             clock: now,
             refresh_seconds,
             hidden,
+            failure_log: crate::app_log::FailureLog::default(),
         })
     }
     /// A denied repository's open runs are frozen at their last known state; they leave the

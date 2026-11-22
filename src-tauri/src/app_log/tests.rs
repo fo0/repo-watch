@@ -209,3 +209,47 @@ fn the_level_reads_its_ipc_names_and_tolerates_a_foreign_stored_value() {
     assert_eq!(level(r#"{"level":7}"#), None);
     assert_eq!(level("{}"), None);
 }
+
+#[test]
+fn a_lasting_failure_is_logged_once_and_again_when_it_changes_or_returns() {
+    let failing = |entries: &[(&str, &str)]| -> BTreeMap<String, String> {
+        entries
+            .iter()
+            .map(|(scope, reason)| ((*scope).to_owned(), (*reason).to_owned()))
+            .collect()
+    };
+    let mut log = FailureLog::default();
+    assert!(log.lines(failing(&[])).is_empty(), "healthy from the start");
+    assert_eq!(
+        log.lines(failing(&[("scope=o/r account=fixture", "offline")])),
+        ["refresh failed: scope=o/r account=fixture reason=offline"]
+    );
+    assert!(log
+        .lines(failing(&[("scope=o/r account=fixture", "offline")]))
+        .is_empty());
+    // A changed reason and a new scope speak; the unchanged one stays quiet.
+    assert_eq!(
+        log.lines(failing(&[
+            ("scope=account account=fixture", "offline"),
+            ("scope=o/r account=fixture", "limit"),
+        ])),
+        [
+            "refresh failed: scope=account account=fixture reason=offline",
+            "refresh failed: scope=o/r account=fixture reason=limit"
+        ]
+    );
+    assert!(log
+        .lines(failing(&[("scope=o/r account=fixture", "limit")]))
+        .is_empty());
+    assert_eq!(
+        log.lines(failing(&[])),
+        ["refresh recovered: data current again"]
+    );
+    assert!(log.lines(failing(&[])).is_empty());
+    assert_eq!(
+        log.lines(failing(&[("scope=o/r account=fixture", "limit")]))
+            .len(),
+        1,
+        "a failure that returns is logged again"
+    );
+}

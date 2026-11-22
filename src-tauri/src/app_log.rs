@@ -5,10 +5,12 @@
 //! (tests, the demo) every call is a no-op. Credentials never reach the file: every line
 //! passes [`sanitise`], and URLs are reduced to their path by [`url_path`]. Callers log only
 //! method, path, status, duration, page counts, user-facing error text, logins and
-//! `owner/repo` — never headers, bodies, ETags or vault content. Lines are fixed English.
+//! `owner/repo` — never headers, bodies, ETags or vault content. Lines are English; an
+//! embedded `reason=` carries the panel's error text in the app language.
 
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::BTreeMap,
     fs,
     io::Write,
     path::{Path, PathBuf},
@@ -215,6 +217,31 @@ impl Logger {
             .append(true)
             .open(path)?
             .write_all(line)
+    }
+}
+
+/// The failing scopes of the last refresh. A scope that keeps failing would otherwise write
+/// its line on every refresh (down to every 15 s) and rotate the useful history away, so a
+/// failure is only written when it is new or its reason changed.
+#[derive(Debug, Default)]
+pub struct FailureLog {
+    last: BTreeMap<String, String>,
+}
+
+impl FailureLog {
+    /// The lines for this refresh's failures (scope → reason), and one recovery line once
+    /// no scope fails any more.
+    pub fn lines(&mut self, current: BTreeMap<String, String>) -> Vec<String> {
+        let mut lines: Vec<String> = current
+            .iter()
+            .filter(|(scope, reason)| self.last.get(*scope) != Some(*reason))
+            .map(|(scope, reason)| format!("refresh failed: {scope} reason={reason}"))
+            .collect();
+        if current.is_empty() && !self.last.is_empty() {
+            lines.push("refresh recovered: data current again".into());
+        }
+        self.last = current;
+        lines
     }
 }
 
