@@ -10,6 +10,11 @@ export const accounts = {
     group: 'Konto',
     connect: 'Konto verbinden …',
     manage: 'Konten verwalten …',
+    /** Tooltip reason of the presence dot when the snapshot names none. */
+    reason: {
+      offline: 'Offline · letzter bekannter Stand',
+      forbidden: 'Kein Zugriff auf GitHub',
+    },
   },
   tab: {
     emptyHeading: 'Noch kein Konto verbunden',

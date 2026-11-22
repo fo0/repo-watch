@@ -141,6 +141,7 @@
       {accountId}
       {accountName}
       connectivity={snapshot?.connectivity}
+      message={snapshot?.message}
       refreshing={panel.refreshing}
       ready={!!snapshot}
       {canRefresh}
