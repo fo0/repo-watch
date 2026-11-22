@@ -124,6 +124,8 @@ export interface DispatchOutcome {
   htmlUrl?: string;
   message: string;
 }
+/** The local log's level (`Level` in src-tauri/src/app_log.rs); info is the default. */
+export type LogLevel = 'info' | 'debug';
 export type DemoScenario = 'normal' | 'offline' | 'forbidden' | 'uncertain';
 /** Mirrors `LocalAccount` in src-tauri/src/local_auth.rs; secrets never cross IPC. */
 export interface LocalAccount {

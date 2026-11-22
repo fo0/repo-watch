@@ -160,6 +160,7 @@ impl<T: Transport> ApiClient<T> {
                 break;
             }
             if !seen.insert(url.clone()) || !same_resource(&first_path, url.path(), &mut alias) {
+                crate::app_log::paging_rejected("repeats or leaves", &first_path, url.path());
                 return Err(ApiError::Policy(tr(
                     "GitHub-Seitenfolge verlässt die angefragte Ressource.",
                     "GitHub paging leaves the requested resource.",
@@ -202,6 +203,8 @@ impl<T: Transport> ApiClient<T> {
                 .as_ref()
                 .is_some_and(|next| !same_resource(&first_path, next.path(), &mut alias))
             {
+                let next = page.next.as_ref().map_or("", ApiUrl::path);
+                crate::app_log::paging_rejected("switches", &first_path, next);
                 return Err(ApiError::Policy(tr(
                     "GitHub-Seitenfolge wechselt die Ressource.",
                     "GitHub paging switches the resource.",
@@ -213,6 +216,7 @@ impl<T: Transport> ApiClient<T> {
                 state.pages.insert(key, page);
             }
         }
+        crate::app_log::pages(&first_path, pages.bodies.len(), pages.truncated);
         Ok(pages)
     }
 
@@ -288,7 +292,11 @@ fn send_once<T: Transport>(
             });
         }
     }
-    let response = state.transport.send(request).map_err(ApiError::Transport)?;
+    let started = std::time::Instant::now();
+    let sent = state.transport.send(request);
+    let status = sent.as_ref().ok().map(|response| response.status);
+    crate::app_log::request(request.method.name(), request.url.path(), status, started);
+    let response = sent.map_err(ApiError::Transport)?;
     if response.body.len() > MAX_RESPONSE_BYTES {
         return Err(ApiError::InvalidResponse);
     }

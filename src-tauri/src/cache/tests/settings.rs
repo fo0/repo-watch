@@ -82,3 +82,38 @@ fn hidden_repositories_round_trip_and_an_older_row_hides_nothing() {
         .unwrap()
         .contains(r#""hiddenRepos":[{"accountId""#));
 }
+
+#[test]
+fn the_log_level_round_trips_and_an_older_or_foreign_row_keeps_info() {
+    use crate::app_log::Level;
+    let cache = Cache::in_memory().unwrap();
+    // A row from before the setting existed.
+    cache
+        .write_settings_row(
+            APP_SETTINGS_KEY,
+            r#"{"notifications":true,"refreshSeconds":300}"#,
+        )
+        .unwrap();
+    let older = cache.load_app_settings().unwrap();
+    assert_eq!(older.log_level, None);
+    // An absent value is not written, so an older build reads the row unchanged.
+    assert!(!encode(&older).unwrap().contains("logLevel"));
+    let debug = AppSettings {
+        log_level: Some(Level::Debug),
+        ..older
+    };
+    cache.save_app_settings(&debug).unwrap();
+    let loaded = cache.load_app_settings().unwrap();
+    assert_eq!(loaded, debug);
+    assert!(encode(&loaded).unwrap().contains(r#""logLevel":"debug""#));
+    // A level from a newer build reads as info and never costs the other settings.
+    cache
+        .write_settings_row(
+            APP_SETTINGS_KEY,
+            r#"{"refreshSeconds":300,"logLevel":"trace"}"#,
+        )
+        .unwrap();
+    let foreign = cache.load_app_settings().unwrap();
+    assert_eq!(foreign.log_level, None);
+    assert_eq!(foreign.refresh_interval(), 300);
+}

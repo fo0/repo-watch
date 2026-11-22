@@ -4,6 +4,7 @@ import type {
   DemoScenario,
   DispatchOutcome,
   DispatchRequest,
+  LogLevel,
   Pin,
   Snapshot,
   UncertainStart,
@@ -32,6 +33,12 @@ export interface Bridge {
   refreshInterval(): Promise<number>;
   /** Stores a validated interval (15–3600 s); rejects with a localized message. */
   setRefreshInterval(seconds: number): Promise<number>;
+  /** The level of the local log file. */
+  logLevel(): Promise<LogLevel>;
+  /** Stores the level; it applies at once. */
+  setLogLevel(level: LogLevel): Promise<LogLevel>;
+  /** Shows the log folder in the file manager; the demo has none. */
+  openLogFolder(): Promise<void>;
   /** Tells the native side the language in effect for its own texts. */
   setLocale(locale: Locale): Promise<void>;
 }

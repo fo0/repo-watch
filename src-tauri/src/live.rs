@@ -225,6 +225,7 @@ impl<T: Transport> LiveStore<T> {
         // An unreadable preference keeps the default interval and hides nothing.
         let settings = cache.load_app_settings().unwrap_or_default();
         let refresh_seconds = settings.refresh_interval();
+        crate::app_log::set_level(settings.log_level.unwrap_or_default());
         let hidden = settings.hidden_repos;
         if !data.accounts.is_empty() {
             data.stale = true;
@@ -300,6 +301,25 @@ impl<T: Transport> LiveStore<T> {
         self.refresh_seconds = seconds;
         self.schedule.set_refresh(seconds, (self.clock)());
         Ok(seconds)
+    }
+    /// The stored log level; an unreadable preference keeps the default: info.
+    pub fn log_level(&self) -> crate::app_log::Level {
+        let settings = self.cache.load_app_settings().unwrap_or_default();
+        settings.log_level.unwrap_or_default()
+    }
+    /// Stores the log level and applies it at once.
+    pub fn set_log_level(
+        &mut self,
+        level: crate::app_log::Level,
+    ) -> Result<crate::app_log::Level, String> {
+        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
+        settings.log_level = Some(level);
+        self.cache
+            .save_app_settings(&settings)
+            .map_err(|_| hidden::hidden_save_failed())?;
+        crate::app_log::set_level(level);
+        crate::app_log::info(&format!("settings: log level={}", level.label()));
+        Ok(level)
     }
     /// Whether the panel shows an open run (queued, running, waiting; not stuck), or a started run is still
     /// being followed, so a refresh is due every 15 seconds

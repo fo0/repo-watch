@@ -3,6 +3,7 @@
   import AccountsTab from './AccountsTab.svelte';
   import HiddenReposSetting from './HiddenReposSetting.svelte';
   import LanguageSetting from './LanguageSetting.svelte';
+  import LogSetting from './LogSetting.svelte';
   import Modal from './Modal.svelte';
   import RefreshSetting from './RefreshSetting.svelte';
   import StartupSettings from './StartupSettings.svelte';
@@ -14,6 +15,7 @@
   import { errorMessage } from './format';
   import { HiddenChoice } from './hiddenChoice.svelte';
   import { m } from './i18n/index.svelte';
+  import { LogChoice } from './logChoice.svelte';
   import { RefreshChoice } from './refresh.svelte';
   import {
     SETTINGS_TABS,
@@ -81,6 +83,7 @@
   const autostart = new Autostart(untrack(() => native));
   const refresh = new RefreshChoice(bridge);
   const hidden = new HiddenChoice();
+  const log = new LogChoice(bridge);
   onDestroy(() => {
     alive = false;
     autostart.dispose();
@@ -102,6 +105,7 @@
     language: appearance.languagePending,
     autostart: autostart.pending !== null,
     refresh: refresh.pending,
+    log: log.pending,
     hidden: hidden.pendingIn(snapshot?.hiddenRepos ?? []),
   });
   const dirty = $derived(Object.values(changed).some(Boolean));
@@ -139,6 +143,7 @@
       if (alive) onClose();
     });
   const disconnect = (id: string) => attempt(() => onDisconnect(id));
+  const openLogFolder = () => void attempt(() => bridge.openLogFolder());
 
   /**
    * Applies every staged change in turn and closes. A change that applied
@@ -164,6 +169,7 @@
       if (pending.theme) appearance.applyTheme();
       if (pending.language) appearance.applyLanguage();
       if (pending.refresh) await refresh.apply();
+      if (pending.log) await log.apply();
       if (pending.hidden)
         await hidden.apply(snapshot?.hiddenRepos ?? [], onUnhide);
       if (pending.autostart) await autostart.apply();
@@ -257,6 +263,7 @@
       <ThemeSetting bind:value={appearance.theme} />
       <RefreshSetting choice={refresh} />
       <HiddenReposSetting {snapshot} choice={hidden} />
+      <LogSetting choice={log} {native} onOpenFolder={openLogFolder} />
       <StartupSettings {native} {autostart} />
     {:else}
       <UpdatePanel

@@ -2,6 +2,7 @@ import fixture from '../../fixtures/demo.json';
 import { autoSelect } from './autoRepos';
 import { demoHidden } from './hiddenRepos';
 import { m } from './i18n/index.svelte';
+import { demoLog } from './logLevel';
 import { safePin, targetKey, validateDispatch } from './model';
 import { demoRefresh } from './refresh';
 import type { Bridge, DemoControls, PreferenceStorage } from './bridgeTypes';
@@ -251,6 +252,7 @@ export function createDemoBridge(
       return snapshot();
     },
     ...demoRefresh(storage),
+    ...demoLog(storage),
     // The demo has no native texts; the panel switches by itself.
     setLocale: () => Promise.resolve(),
     async setDemoScenario(next) {

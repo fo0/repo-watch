@@ -141,6 +141,16 @@ impl<T: Transport> LiveStore<T> {
             Err(error) => DispatchOutcome::rejected(error),
             Ok((repo, api)) => self.send_claimed(&request, repo, api),
         };
+        let repo = self.data.repos.iter().find(|r| r.id == request.repo_id);
+        crate::app_log::info(&format!(
+            "dispatch: state={} repo={}",
+            match outcome.state {
+                DispatchState::Accepted => "accepted",
+                DispatchState::Uncertain => "uncertain",
+                DispatchState::Rejected => "rejected",
+            },
+            repo.map_or_else(|| "-".into(), |r| format!("{}/{}", r.owner, r.name))
+        ));
         self.outcomes
             .insert(request.request_id, (fingerprint, outcome.clone()));
         outcome

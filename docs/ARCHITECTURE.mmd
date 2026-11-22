@@ -57,6 +57,7 @@ flowchart TD
         UpdatesRs["updates.rs and updates/installer.rs update policy, verified download"]
         DemoRs["demo.rs local simulation"]
         I18nRs["i18n.rs tr and trf native texts"]
+        AppLogRs["app_log.rs local log file, sanitised lines"]
     end
 
     subgraph "External Systems"
@@ -105,6 +106,9 @@ flowchart TD
     Components -->|"texts via m(), Sprache"| I18nTs
     I18nTs -->|"set_locale"| Bridge
     DesktopRs -->|"set_locale, tray labels"| I18nRs
+    DesktopRs -->|"init, start line, open log folder"| AppLogRs
+    LiveRs -->|"refresh failures, dispatch outcomes, level"| AppLogRs
+    GithubMods -->|"debug: requests, paging"| AppLogRs
     Bridge -->|"browser mode"| DemoTs
     DemoTs --> DemoFixture
     DemoTs --> AutoReposTs
@@ -186,6 +190,7 @@ flowchart TD
     click ThemeTs "src/lib/theme.ts"
     click I18nTs "src/lib/i18n/index.svelte.ts"
     click I18nRs "src-tauri/src/i18n.rs"
+    click AppLogRs "src-tauri/src/app_log.rs"
     click Bridge "src/lib/bridge.ts"
     click IpcTs "src/lib/ipc.ts"
     click ClockTs "src/lib/clock.ts"
@@ -233,7 +238,7 @@ flowchart TD
     classDef infra fill:#7b42bc,stroke:#5e338f,color:#fff
 
     class AppSvelte,PanelTs,StartsTs,NoticesTs,FavoritesTs,ModalsTs,ViewTs,DispatchFormTs,UpdaterTs,AutostartTs,AutoReposTs,Components,FocusTs,Styles,ThemeTs,I18nTs,Bridge,IpcTs,ClockTs,ShortcutsTs,SafeUrlTs,DemoTs,ModelTs,AccountSel frontend
-    class MainRs,DesktopRs,DesktopAuth,DesktopStartup,TrayPopup,DesktopUpdates,LibRs,LiveRs,LiveMods,GithubRs,GithubMods,RunHistory,AutoReposRs,WorkflowRs,ModelsRs,AuthRs,BrowserAuth,LocalAuth,CacheRs,StartupRs,PopupRs,RunLinkRs,UpdatesRs,DemoRs,I18nRs backend
+    class MainRs,DesktopRs,DesktopAuth,DesktopStartup,TrayPopup,DesktopUpdates,LibRs,LiveRs,LiveMods,GithubRs,GithubMods,RunHistory,AutoReposRs,WorkflowRs,ModelsRs,AuthRs,BrowserAuth,LocalAuth,CacheRs,StartupRs,PopupRs,RunLinkRs,UpdatesRs,DemoRs,I18nRs,AppLogRs backend
     class DemoFixture,RunLinksFixture,SQLite database
     class GitHubApi,Keyring,Releases,RunKey external
     class Checks,RustTests,IpcContract,ReleaseYml,ReleaseScripts infra

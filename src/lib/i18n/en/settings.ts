@@ -43,6 +43,12 @@ export const settings: typeof German = {
     none: 'None',
     notFound: 'Repository not found.',
   },
+  log: {
+    heading: 'Log',
+    info: 'Info',
+    debug: 'Debug',
+    openFolder: 'Open folder',
+  },
   startup: {
     heading: 'Autostart',
     demo: 'The browser demo does not change Windows settings.',

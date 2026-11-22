@@ -357,6 +357,17 @@ impl<T: Transport> LiveStore<T> {
     }
     fn settle(&mut self, issues: RefreshIssues) {
         let denied = self.denied_notice();
+        for failure in &issues.failures {
+            crate::app_log::info(&format!(
+                "refresh failed: scope={} account={} reason={}",
+                failure.repo.as_deref().unwrap_or("account"),
+                failure.login,
+                failure.describe()
+            ));
+        }
+        if issues.failures.is_empty() && self.data.stale {
+            crate::app_log::info("refresh recovered: data current again");
+        }
         // An account that needs reconnecting is the most actionable headline.
         let headline = issues
             .failures

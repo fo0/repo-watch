@@ -26,6 +26,9 @@ const nativeBridge: Bridge = {
     call('set_repo_hidden', { accountId, repoId, hidden }),
   refreshInterval: () => call('refresh_interval'),
   setRefreshInterval: (seconds) => call('set_refresh_interval', { seconds }),
+  logLevel: () => call('log_level'),
+  setLogLevel: (level) => call('set_log_level', { level }),
+  openLogFolder: () => call('open_log_folder'),
   setLocale: (locale) => call('set_locale', { locale }),
 };
 

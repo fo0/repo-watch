@@ -2,6 +2,7 @@
 
 mod desktop;
 mod desktop_auth;
+mod desktop_log;
 mod desktop_startup;
 mod desktop_tray;
 mod desktop_updates;

@@ -171,3 +171,18 @@ fn a_backward_clock_jump_stalls_metadata_and_holds_no_longer_than_their_own_dela
     assert!(!schedule.catalog_due("h", 10_100));
     assert!(schedule.catalog_due("h", 10_000 + METADATA_SECONDS));
 }
+
+#[test]
+fn the_log_level_is_stored_and_survives_a_restart_beside_the_other_settings() {
+    use crate::app_log::Level;
+    let mut h = Harness::new("log-level", Remote::new(), &["github-1"]);
+    assert_eq!(h.live.log_level(), Level::Info, "the default");
+    h.live.set_refresh_interval(300).unwrap();
+    assert_eq!(h.live.set_log_level(Level::Debug), Ok(Level::Debug));
+    assert_eq!(h.live.log_level(), Level::Debug);
+    let restarted = h.restart();
+    assert_eq!(restarted.log_level(), Level::Debug);
+    assert_eq!(restarted.refresh_interval(), 300);
+    assert_eq!(h.live.set_log_level(Level::Info), Ok(Level::Info));
+    assert_eq!(h.restart().log_level(), Level::Info);
+}
