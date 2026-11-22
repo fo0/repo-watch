@@ -1,5 +1,6 @@
 use crate::desktop_tray::{self, TrayMenu, TRAY_ID};
 use repowatch_core::{
+    app_log,
     auth::{DeviceFlow, OsKeyring},
     cache::Cache,
     i18n::tr,
@@ -220,7 +221,7 @@ pub fn run() {
             // A duplicate login launch must neither show nor hide the existing panel.
             if repowatch_core::startup::show_on_launch(args) {
                 if let Err(error) = crate::tray_popup::show(app) {
-                    eprintln!("RepoWatch popup: {error}");
+                    crate::desktop_log::popup_failed(&error);
                 }
             }
         }))
@@ -233,9 +234,16 @@ pub fn run() {
         .setup(move |app| {
             let cache_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&cache_dir)?;
+            // Started before the engine, which applies the stored level.
+            app_log::init(&cache_dir.join(app_log::DIR_NAME));
             let cache = Cache::open(cache_dir.join("repowatch-live.db"))?;
             let store =
                 LiveStore::new(cache, Arc::new(OsKeyring::new())).map_err(std::io::Error::other)?;
+            app_log::info(&format!(
+                "app start: version={} level={}",
+                app.package_info().version,
+                app_log::level().label()
+            ));
             let baseline = store.snapshot();
             let notify = store.notifications_enabled();
             let refresh_seconds = store.refresh_interval();
@@ -262,12 +270,20 @@ pub fn run() {
                 notify,
                 None::<&str>,
             )?;
+            let log_folder = MenuItem::with_id(
+                app,
+                "log-folder",
+                desktop_tray::log_folder_label(),
+                true,
+                None::<&str>,
+            )?;
             let quit =
                 MenuItem::with_id(app, "quit", desktop_tray::quit_label(), true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show, &notifications, &quit])?;
+            let menu = Menu::with_items(app, &[&show, &notifications, &log_folder, &quit])?;
             app.manage(TrayMenu::new(
                 show.clone(),
                 notifications.clone(),
+                log_folder.clone(),
                 quit.clone(),
             ));
             TrayIconBuilder::with_id(TRAY_ID)
@@ -278,6 +294,11 @@ pub fn run() {
                 .on_menu_event(move |app, event| match event.id.as_ref() {
                     "toggle" => crate::tray_popup::toggle(app),
                     "quit" => app.exit(0),
+                    "log-folder" => {
+                        if let Err(error) = crate::desktop_log::open_folder(app) {
+                            app_log::info(&format!("log folder: {error}"));
+                        }
+                    }
                     "notifications" => {
                         if let Some(state) = app.try_state::<NativeState>() {
                             let enabled = !state.notifications.load(Ordering::Relaxed);
@@ -390,6 +411,9 @@ pub fn run() {
             refresh_interval,
             set_refresh_interval,
             crate::desktop_tray::set_locale,
+            crate::desktop_log::log_level,
+            crate::desktop_log::set_log_level,
+            crate::desktop_log::open_log_folder,
             save_pin,
             delete_pin,
             dispatch_workflow,

@@ -90,6 +90,14 @@ pub enum Method {
     Get,
     Post,
 }
+impl Method {
+    fn name(self) -> &'static str {
+        match self {
+            Self::Get => "GET",
+            Self::Post => "POST",
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct ApiRequest {

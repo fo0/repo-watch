@@ -11,6 +11,7 @@
     accountId,
     accountName,
     connectivity,
+    message,
     disabled,
     onChange,
     onConnect,
@@ -24,6 +25,8 @@
     accountName: (id: string) => string;
     /** Undefined while the first snapshot loads. */
     connectivity: Snapshot['connectivity'] | undefined;
+    /** The snapshot's reason, the one the warning banner shows. */
+    message: string | undefined;
     /** No snapshot yet, or a settings change is running. */
     disabled: boolean;
     onChange: (id: string) => void;
@@ -58,6 +61,16 @@
         : connectivity === 'offline'
           ? 'wait'
           : 'fail',
+  );
+  // A yellow or red dot says why in the tooltip and to assistive tech; the
+  // banner may be scrolled away. Same text as the banner when there is one.
+  const reason = $derived(
+    presence === 'wait' || presence === 'fail'
+      ? message ||
+          (presence === 'wait'
+            ? m().accounts.menu.reason.offline
+            : m().accounts.menu.reason.forbidden)
+      : '',
   );
 
   // A settings change that starts meanwhile closes the menu.
@@ -133,7 +146,8 @@
       aria-label={m().accounts.menu.switchTo(
         active || !native ? m().accounts.menu.named(label) : label,
       )}
-      title={label}
+      aria-describedby={reason ? `${id}-reason` : undefined}
+      title={reason ? `${label}\n${reason}` : label}
       {disabled}
       onclick={() => (open ? (open = false) : show('first'))}
       onkeydown={onTriggerKey}
@@ -148,7 +162,7 @@
         size={14}
         class="account-caret"
       /></button
-    >
+    >{#if reason}<span id={`${id}-reason`} class="sr-only">{reason}</span>{/if}
   </div>
   {#if open}
     <!-- tabindex="-1": a press on the label, separator or padding focuses the

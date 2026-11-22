@@ -11,6 +11,10 @@ export const accounts: typeof German = {
     group: 'Account',
     connect: 'Connect account…',
     manage: 'Manage accounts…',
+    reason: {
+      offline: 'Offline · last known state',
+      forbidden: 'No access to GitHub',
+    },
   },
   tab: {
     emptyHeading: 'No account connected yet',

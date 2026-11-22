@@ -155,7 +155,7 @@ fn toggle_at(app: &tauri::AppHandle, icon: Option<Rect>) {
         show_at(app, icon)
     };
     if let Err(error) = result {
-        eprintln!("RepoWatch popup: {error}");
+        crate::desktop_log::popup_failed(&error);
     }
 }
 
@@ -198,7 +198,7 @@ pub fn tray_event(app: &tauri::AppHandle, event: TrayIconEvent) {
         // Explorer takes focus for the second click too. Keep the first click's
         // open state and restore focus instead of immediately dismissing it.
         if let Err(error) = show_at(app, clicked_anchor) {
-            eprintln!("RepoWatch popup: {error}");
+            crate::desktop_log::popup_failed(&error);
         }
     } else {
         schedule_dismiss(app);

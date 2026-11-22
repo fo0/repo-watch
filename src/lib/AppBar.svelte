@@ -11,6 +11,7 @@
     accountId,
     accountName,
     connectivity,
+    message,
     refreshing,
     ready,
     canRefresh,
@@ -29,6 +30,8 @@
     accountName: (id: string) => string;
     /** Undefined while the first snapshot loads. */
     connectivity: Snapshot['connectivity'] | undefined;
+    /** The snapshot's reason for a stale or refused state. */
+    message: string | undefined;
     refreshing: boolean;
     /** A snapshot is loaded; settings and the account menu wait for it. */
     ready: boolean;
@@ -82,6 +85,7 @@
       {accountId}
       {accountName}
       {connectivity}
+      {message}
       disabled={!ready || busy}
       onChange={onAccountChange}
       {onConnect}

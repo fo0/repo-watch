@@ -6,6 +6,7 @@ import type {
   DispatchOutcome,
   DispatchRequest,
   DownloadProgress,
+  LogLevel,
   LocalDiscovery,
   Pin,
   Snapshot,
@@ -28,6 +29,12 @@ export interface Commands {
   refresh_interval: { args: undefined; result: number };
   /** Validates (15–3600 s) and stores the interval; resolves with the saved value. */
   set_refresh_interval: { args: { seconds: number }; result: number };
+  /** The level of the local log file; read without the engine lock. */
+  log_level: { args: undefined; result: LogLevel };
+  /** Stores the level; resolves with the saved value. */
+  set_log_level: { args: { level: LogLevel }; result: LogLevel };
+  /** Creates the log folder if it is missing and shows it in the file manager. */
+  open_log_folder: { args: undefined; result: void };
   /** The language in effect for native texts: errors, notifications, tray. */
   set_locale: { args: { locale: Locale }; result: void };
   save_pin: { args: { pin: Pin }; result: Snapshot };
@@ -91,6 +98,9 @@ const REGISTERED: Record<Command, true> = {
   refresh_interval: true,
   set_refresh_interval: true,
   set_locale: true,
+  log_level: true,
+  set_log_level: true,
+  open_log_folder: true,
   save_pin: true,
   delete_pin: true,
   dispatch_workflow: true,

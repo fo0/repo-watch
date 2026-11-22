@@ -23,6 +23,10 @@ pub(crate) fn notifications_label() -> &'static str {
     tr("Run-Benachrichtigungen", "Run notifications")
 }
 
+pub(crate) fn log_folder_label() -> &'static str {
+    tr("Log-Ordner öffnen", "Open log folder")
+}
+
 pub(crate) fn quit_label() -> &'static str {
     tr("RepoWatch beenden", "Quit RepoWatch")
 }
@@ -43,6 +47,7 @@ fn tooltip(status: u8) -> &'static str {
 pub(crate) struct TrayMenu {
     show: MenuItem<Wry>,
     notifications: CheckMenuItem<Wry>,
+    log_folder: MenuItem<Wry>,
     quit: MenuItem<Wry>,
     status: AtomicU8,
 }
@@ -51,11 +56,13 @@ impl TrayMenu {
     pub(crate) fn new(
         show: MenuItem<Wry>,
         notifications: CheckMenuItem<Wry>,
+        log_folder: MenuItem<Wry>,
         quit: MenuItem<Wry>,
     ) -> Self {
         Self {
             show,
             notifications,
+            log_folder,
             quit,
             status: AtomicU8::new(UNKNOWN),
         }
@@ -89,6 +96,7 @@ pub(crate) fn set_locale(app: tauri::AppHandle, locale: Locale) {
     };
     let _ = menu.show.set_text(show_label());
     let _ = menu.notifications.set_text(notifications_label());
+    let _ = menu.log_folder.set_text(log_folder_label());
     let _ = menu.quit.set_text(quit_label());
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
         let _ = tray.set_tooltip(Some(tooltip(menu.status.load(Ordering::Relaxed))));

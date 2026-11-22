@@ -72,6 +72,12 @@ pub struct AppSettings {
     /// Repositories the user hid from the panel lists (ADR-0008); not written when empty.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub hidden_repos: Vec<HiddenRepo>,
+    /// The log level; absent means info, and so does a value this build does not know.
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::app_log::lenient_level"
+    )]
+    pub log_level: Option<crate::app_log::Level>,
 }
 
 impl AppSettings {

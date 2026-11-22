@@ -44,6 +44,13 @@ export const settings = {
     none: 'Keine',
     notFound: 'Repository nicht gefunden.',
   },
+  log: {
+    heading: 'Protokoll',
+    info: 'Info',
+    debug: 'Debug',
+    /** Immediate action: shows the folder of the log file. */
+    openFolder: 'Ordner öffnen',
+  },
   startup: {
     heading: 'Autostart',
     demo: 'Die Browser-Demo ändert keine Windows-Einstellungen.',
