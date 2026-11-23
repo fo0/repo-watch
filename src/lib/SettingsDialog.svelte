@@ -1,13 +1,8 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
   import AccountsTab from './AccountsTab.svelte';
-  import HiddenReposSetting from './HiddenReposSetting.svelte';
-  import LanguageSetting from './LanguageSetting.svelte';
-  import LogSetting from './LogSetting.svelte';
+  import AppTab from './AppTab.svelte';
   import Modal from './Modal.svelte';
-  import RefreshSetting from './RefreshSetting.svelte';
-  import StartupSettings from './StartupSettings.svelte';
-  import ThemeSetting from './ThemeSetting.svelte';
   import UpdatePanel from './UpdatePanel.svelte';
   import { AppearanceChoice } from './appearanceChoice.svelte';
   import { Autostart } from './autostart.svelte';
@@ -259,12 +254,16 @@
         onDisconnect={disconnect}
       />
     {:else if tab === 'app'}
-      <LanguageSetting bind:value={appearance.language} />
-      <ThemeSetting bind:value={appearance.theme} />
-      <RefreshSetting choice={refresh} />
-      <HiddenReposSetting {snapshot} choice={hidden} />
-      <LogSetting choice={log} {native} onOpenFolder={openLogFolder} />
-      <StartupSettings {native} {autostart} />
+      <AppTab
+        {snapshot}
+        {native}
+        {appearance}
+        {refresh}
+        {hidden}
+        {log}
+        {autostart}
+        onOpenFolder={openLogFolder}
+      />
     {:else}
       <UpdatePanel
         currentVersion={appVersion}
