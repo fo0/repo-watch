@@ -297,6 +297,13 @@ pub fn run() {
                     "log-folder" => {
                         if let Err(error) = crate::desktop_log::open_folder(app) {
                             app_log::info(&format!("log folder: {error}"));
+                            // The tray has no surface of its own; tell the user who clicked.
+                            let _ = app
+                                .notification()
+                                .builder()
+                                .title("RepoWatch")
+                                .body(error)
+                                .show();
                         }
                     }
                     "notifications" => {
