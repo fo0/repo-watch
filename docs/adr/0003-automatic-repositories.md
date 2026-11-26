@@ -1,6 +1,6 @@
 # ADR-0003: Automatic repositories
 
-- **Status:** Accepted; partly superseded — the search that filters only the automatic set by [ADR-0006](0006-search-reaches-every-repository.md), the removal of a repository by the user (now allowed: hiding) by [ADR-0008](0008-hidden-repositories.md)
+- **Status:** Accepted; partly superseded — the search that filters only the automatic set by [ADR-0006](0006-search-reaches-every-repository.md), the removal of a repository by the user (now allowed: hiding) by [ADR-0008](0008-hidden-repositories.md), the scope of every owner the account reaches (now a user choice: the owner filter) by [ADR-0010](0010-owner-filter.md)
 - **Date:** 2026-11-01
 - **Decider(s):** owner
 - **Tags:** ui, repositories, catalog
@@ -12,7 +12,7 @@ ADR-0002 made the tray's repositories a manual choice in the panel: the page „
 
 ## Decision
 
-We will derive the tray's repositories automatically, per account: the 10 repositories with the newest `pushed_at` (a missing push time last, ties by owner/name), plus every repository of a favorite of that account _(a repository the user hid gives up its place, ADR-0008)_. The set is recomputed whenever an account's repository listing arrives; an account without a fresh listing keeps its last set. The overview shows up to 10 repositories; the maximized Repositories page shows the whole set, and the search filters it _(superseded by ADR-0006)_. Removed: the native selection command, the picker page „Repositories im Tray“, „+ Hinzufügen“, „Nicht im Tray“, „Aus Tray entfernen“, the 50-repository cap and the empty state „Repositories auswählen“. The account menu, account scoping (natively the active account in the foreground, the other accounts observed in the background) and the remaining „⋯“ actions are unchanged.
+We will derive the tray's repositories automatically, per account: the 10 repositories with the newest `pushed_at` (a missing push time last, ties by owner/name), plus every repository of a favorite of that account _(a repository the user hid gives up its place, ADR-0008)_ _(the owners whose repositories it ranks: superseded by ADR-0010)_. The set is recomputed whenever an account's repository listing arrives; an account without a fresh listing keeps its last set. The overview shows up to 10 repositories; the maximized Repositories page shows the whole set, and the search filters it _(superseded by ADR-0006)_. Removed: the native selection command, the picker page „Repositories im Tray“, „+ Hinzufügen“, „Nicht im Tray“, „Aus Tray entfernen“, the 50-repository cap and the empty state „Repositories auswählen“. The account menu, account scoping (natively the active account in the foreground, the other accounts observed in the background) and the remaining „⋯“ actions are unchanged.
 
 ## Consequences
 

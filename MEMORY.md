@@ -33,6 +33,11 @@ Stable project knowledge. **Read at session start.**
 - **Date:** 2026-11-03
 - **Decision (owner, #30):** „Ausblenden“ in a repository row's „⋯“ menu hides it (8 s „Rückgängig“); Settings → App „Ausgeblendete Repositories“ shows it again, staged until „Speichern“. Stored natively in `AppSettings.hiddenRepos` (account + repository ID, owner, name), sent as `Snapshot.hiddenRepos`, changed by `set_repo_hidden`. A hidden repository takes none of the 10 newest places and leaves every list and run list; a favorite keeps it selected and polled, and the search still finds it. Disconnect drops an account's entries. Partly supersedes ADR-0003: [ADR-0008](docs/adr/0008-hidden-repositories.md).
 
+### Owners are a per-account filter
+
+- **Date:** 2026-11-26
+- **Decision (owner, #108):** Settings → App „Organisationen“ (above „Ausgeblendete Repositories“): per account with more than one owner, one toggle per owner (personal account and organizations from the listing's `Repo.owner` — no `/user/orgs`, no `read:org`), all on by default, at least one stays, staged until „Speichern“. Stored in `AppSettings.ownerFilters` (`{ accountId, owners[] }`, none = all owners), sent as `Snapshot.ownerFilters`, changed by `set_owner_filter` (empty = removed). A repository of an unwatched owner behaves like a hidden one; owner names compare case-insensitively; disconnect drops the filter. Partly supersedes ADR-0003: [ADR-0010](docs/adr/0010-owner-filter.md).
+
 ### The app speaks German or English
 
 - **Date:** 2026-11-04
@@ -80,4 +85,4 @@ Stable project knowledge. **Read at session start.**
 
 - **Chat in German, direct, no filler**; generated files and commits in English (owner, 2026-11-01)
 - **Simple subagent work may run at effort `high`** on the session's model instead of inheriting the session effort (owner, 2026-11-01)
-- **Never reintroduce manual repository selection** — the owner asked three times before the picker went; repositories are automatic ([ADR-0003](docs/adr/0003-automatic-repositories.md)), UI rules in `agent_docs/ux_rules.md`; hiding a noisy repository is the one removal the owner allows ([ADR-0008](docs/adr/0008-hidden-repositories.md), 2026-11-03) (owner, 2026-11-01)
+- **Never reintroduce manual repository selection** — the owner asked three times before the picker went; repositories are automatic ([ADR-0003](docs/adr/0003-automatic-repositories.md)), UI rules in `agent_docs/ux_rules.md`; hiding a noisy repository ([ADR-0008](docs/adr/0008-hidden-repositories.md), 2026-11-03) and the per-account owner filter ([ADR-0010](docs/adr/0010-owner-filter.md), 2026-11-26) are the only narrowing the owner allows — never a picker or add (owner, 2026-11-01)
