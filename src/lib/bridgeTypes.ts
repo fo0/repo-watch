@@ -29,6 +29,8 @@ export interface Bridge {
     repoId: string,
     hidden: boolean,
   ): Promise<Snapshot>;
+  /** Sets the owners an account watches; no owners watches every owner. */
+  setOwnerFilter(accountId: string, owners: string[]): Promise<Snapshot>;
   /** Seconds between idle refreshes. */
   refreshInterval(): Promise<number>;
   /** Stores a validated interval (15–3600 s); rejects with a localized message. */

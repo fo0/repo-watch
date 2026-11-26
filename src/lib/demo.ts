@@ -4,6 +4,7 @@ import { demoHidden } from './hiddenRepos';
 import { m } from './i18n/index.svelte';
 import { demoLog } from './logLevel';
 import { safePin, targetKey, validateDispatch } from './model';
+import { demoOwners } from './ownerFilter';
 import { demoRefresh } from './refresh';
 import type { Bridge, DemoControls, PreferenceStorage } from './bridgeTypes';
 import type {
@@ -11,6 +12,7 @@ import type {
   DispatchOutcome,
   DispatchRequest,
   HiddenRepo,
+  OwnerFilter,
   Pin,
   Snapshot,
   UncertainStart,
@@ -26,10 +28,14 @@ const fingerprint = (request: DispatchRequest) =>
   ]);
 
 /** The fixture under the native rule: each account's newest repositories. */
-function initial(pins?: Pin[], hidden: HiddenRepo[] = []): Snapshot {
+function initial(
+  pins?: Pin[],
+  hidden: HiddenRepo[] = [],
+  owners: OwnerFilter[] = [],
+): Snapshot {
   const data = copy(fixture) as Snapshot;
   if (pins) data.pins = pins;
-  data.repos = autoSelect(data.repos, data.pins, hidden);
+  data.repos = autoSelect(data.repos, data.pins, hidden, owners);
   return data;
 }
 
@@ -38,7 +44,8 @@ export function createDemoBridge(
   latency = 300,
 ): Bridge & DemoControls {
   const hidden = demoHidden(storage);
-  let data = initial(undefined, hidden.list);
+  const owners = demoOwners(storage);
+  let data = initial(undefined, hidden.list, owners.list);
   let scenario: DemoScenario = 'normal';
   let nextRun = 9000;
   let generation = 0;
@@ -66,6 +73,7 @@ export function createDemoBridge(
           }
         }),
         hidden.list,
+        owners.list,
       );
     }
   } catch {
@@ -110,6 +118,7 @@ export function createDemoBridge(
       stale: scenario === 'offline',
       uncertainStarts: [...uncertain.values()],
       ...(hidden.list.length ? { hiddenRepos: hidden.list } : {}),
+      ...(owners.list.length ? { ownerFilters: owners.list } : {}),
       message:
         scenario === 'offline'
           ? m().demo.offline
@@ -239,7 +248,17 @@ export function createDemoBridge(
     },
     async setRepoHidden(accountId, repoId, hide) {
       data.repos = hidden.change(data.repos, accountId, repoId, hide, (list) =>
-        autoSelect(data.repos, data.pins, list),
+        autoSelect(data.repos, data.pins, list, owners.list),
+      );
+      return snapshot();
+    },
+    async setOwnerFilter(accountId, watched) {
+      data.repos = owners.change(
+        data.accounts,
+        data.repos,
+        accountId,
+        watched,
+        (list) => autoSelect(data.repos, data.pins, hidden.list, list),
       );
       return snapshot();
     },
@@ -262,6 +281,7 @@ export function createDemoBridge(
     async resetDemo() {
       generation++;
       hidden.reset();
+      owners.reset();
       data = initial();
       scenario = 'normal';
       nextRun = 9000;

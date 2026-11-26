@@ -1,5 +1,6 @@
 // Repository rows: activity, search reach and when each last ran.
 import { isHidden } from './hiddenRepos';
+import { isFilteredOut } from './ownerFilter';
 import { fullRepo } from './model';
 import { isActive, recentRuns, repositoryStatus } from './runs';
 import { matchesTerms, searchTerms } from './search';
@@ -11,7 +12,8 @@ import type { Repo, Run, Snapshot, Workflow } from './types';
  * snapshot. A search also reaches the account's other repositories by
  * `owner/name`, after every selected match and newest push first: they carry
  * no workflows or runs until opened (`loaded: false`). A hidden repository
- * shows only in a search (ADR-0008), marked `hidden`.
+ * shows only in a search (ADR-0008), marked `hidden`; so does one whose
+ * owner the account's filter leaves out (#108), unmarked.
  */
 export function repositoryActivity(
   snapshot: Snapshot,
@@ -24,8 +26,10 @@ export function repositoryActivity(
     (repo) => !accountId || repo.accountId === accountId,
   );
   const hidden = (repo: Repo) => isHidden(snapshot.hiddenRepos, repo);
+  const listed = (repo: Repo) =>
+    !hidden(repo) && !isFilteredOut(snapshot.ownerFilters, repo);
   const loaded = ofAccount
-    .filter((repo) => repo.selected && (searching || !hidden(repo)))
+    .filter((repo) => repo.selected && (searching || listed(repo)))
     .map((repo) => {
       const runs = snapshot.runs.filter((run) => run.repoId === repo.id);
       const latest = [...runs].sort(

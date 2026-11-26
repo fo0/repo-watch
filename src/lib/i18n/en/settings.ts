@@ -36,6 +36,14 @@ export const settings: typeof German = {
     recommended: 'Recommended',
     custom: 'Custom value',
   },
+  owners: {
+    heading: 'Organizations',
+    account: (login: string) => `Organizations of ${login}`,
+    watched: (owner: string) => `${owner}: watched`,
+    ignored: (owner: string) => `${owner}: hidden`,
+    last: 'At least one stays watched',
+    notFound: 'Account not found.',
+  },
   hidden: {
     heading: 'Hidden repositories',
     show: 'Show',

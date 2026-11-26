@@ -1,6 +1,7 @@
 // Run lists, status and duration for the activity and repository views.
 import type { IconName } from './Icon.svelte';
 import { isHidden } from './hiddenRepos';
+import { isFilteredOut } from './ownerFilter';
 import { m } from './i18n/index.svelte';
 import { fullRepo } from './model';
 import { matchesTerms, searchTerms } from './search';
@@ -162,14 +163,16 @@ export function visibleRuns(
   filter: ActivityFilter,
 ): Run[] {
   const terms = searchTerms(query);
-  // A hidden repository's runs stay out of every run list (ADR-0008).
+  // A hidden repository's runs stay out of every run list (ADR-0008), as do
+  // those of an owner the account's filter leaves out (#108).
   const repos = new Map(
     snapshot.repos
       .filter(
         (r) =>
           r.selected &&
           (!accountId || r.accountId === accountId) &&
-          !isHidden(snapshot.hiddenRepos, r),
+          !isHidden(snapshot.hiddenRepos, r) &&
+          !isFilteredOut(snapshot.ownerFilters, r),
       )
       .map((r) => [r.id, r]),
   );

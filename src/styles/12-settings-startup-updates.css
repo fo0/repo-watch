@@ -303,13 +303,33 @@
 
 /* App tab: „Ausgeblendete Repositories“ – one line per hidden repository; a
    pressed „Einblenden“ is staged until „Speichern“. */
+/* „Organisationen“ above it: one line per account with several owners, a
+   pressed owner is watched. */
+.owner-setting,
 .hidden-setting {
   margin-bottom: 22px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
+.owner-setting h3,
 .hidden-setting h3 {
   margin: 0 0 8px;
+}
+.owner-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+}
+.owner-account {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-meta);
+  color: var(--text-2);
 }
 .hidden-list {
   margin: 0;
@@ -342,10 +362,15 @@
 .hidden-row.staged .hidden-name {
   color: var(--text-2);
 }
+.owner-row .secondary-button[aria-pressed='true'],
 .hidden-row .secondary-button[aria-pressed='true'] {
   border-color: var(--accent-line);
   background:
     linear-gradient(var(--accent-soft), var(--accent-soft)), var(--raised);
+}
+/* The last watched owner stays shown as watched; its tooltip says why it is off. */
+.owner-row .secondary-button[aria-pressed='true'][aria-disabled='true'] {
+  opacity: 1;
 }
 .hidden-empty {
   margin: 0;

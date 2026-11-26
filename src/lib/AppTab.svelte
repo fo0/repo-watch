@@ -2,6 +2,7 @@
   import HiddenReposSetting from './HiddenReposSetting.svelte';
   import LanguageSetting from './LanguageSetting.svelte';
   import LogSetting from './LogSetting.svelte';
+  import OwnerFilterSetting from './OwnerFilterSetting.svelte';
   import RefreshSetting from './RefreshSetting.svelte';
   import StartupSettings from './StartupSettings.svelte';
   import ThemeSetting from './ThemeSetting.svelte';
@@ -9,6 +10,7 @@
   import type { Autostart } from './autostart.svelte';
   import type { HiddenChoice } from './hiddenChoice.svelte';
   import type { LogChoice } from './logChoice.svelte';
+  import type { OwnerChoice } from './ownerChoice.svelte';
   import type { RefreshChoice } from './refresh.svelte';
   import type { Snapshot } from './types';
 
@@ -19,6 +21,7 @@
     native,
     appearance,
     refresh,
+    owners,
     hidden,
     log,
     autostart,
@@ -28,6 +31,7 @@
     native: boolean;
     appearance: AppearanceChoice;
     refresh: RefreshChoice;
+    owners: OwnerChoice;
     hidden: HiddenChoice;
     log: LogChoice;
     autostart: Autostart;
@@ -38,6 +42,7 @@
 <LanguageSetting bind:value={appearance.language} />
 <ThemeSetting bind:value={appearance.theme} />
 <RefreshSetting choice={refresh} />
+<OwnerFilterSetting {snapshot} choice={owners} />
 <HiddenReposSetting {snapshot} choice={hidden} />
 <LogSetting choice={log} {native} {onOpenFolder} />
 <StartupSettings {native} {autostart} />

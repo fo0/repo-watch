@@ -57,6 +57,11 @@ export interface Commands {
     args: { accountId: string; repoId: string; hidden: boolean };
     result: Snapshot;
   };
+  /** Sets the owners an account watches (empty: all); the selection applies at once. */
+  set_owner_filter: {
+    args: { accountId: string; owners: string[] };
+    result: Snapshot;
+  };
   connect_token: { args: { token: string }; result: Snapshot };
   browser_auth_config: { args: undefined; result: BrowserConfig };
   start_browser_auth: { args: undefined; result: BrowserReply };
@@ -108,6 +113,7 @@ const REGISTERED: Record<Command, true> = {
   cancel_run: true,
   open_repository: true,
   set_repo_hidden: true,
+  set_owner_filter: true,
   connect_token: true,
   browser_auth_config: true,
   start_browser_auth: true,

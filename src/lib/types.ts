@@ -87,6 +87,16 @@ export interface Snapshot {
   uncertainStarts?: UncertainStart[];
   /** Repositories the user hid from the lists; omitted when none. */
   hiddenRepos?: HiddenRepo[];
+  /** Owners watched per account; omitted or empty when every owner is. */
+  ownerFilters?: OwnerFilter[];
+}
+/**
+ * Mirrors `OwnerFilter` in src-tauri/src/models.rs: the owners of an
+ * account's repositories that are watched; the others behave as hidden.
+ */
+export interface OwnerFilter {
+  accountId: string;
+  owners: string[];
 }
 /**
  * Mirrors `HiddenRepo` in src-tauri/src/models.rs: a repository hidden from

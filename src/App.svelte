@@ -219,6 +219,7 @@
     onReset={panel.resetDemo}
     onDisconnect={panel.disconnectAccount}
     onUnhide={panel.actions.unhide}
+    onSetOwners={panel.actions.setOwners}
   />
 {:else if modals.kind === 'connect'}
   <Modal
