@@ -46,3 +46,7 @@ Automated fixtures and Windows compilation do not prove a live account, native c
 ## Regression tests
 
 `pnpm release:test` includes tests that execute the actual PowerShell run blocks from the Action against a temporary local Git repository and simulated GitHub/build commands. They cover the manual run's Checks gate (green, failed, missing), a complete keyless EXE release, and a failed or altered download of the published EXE. Nothing is published or installed. PowerShell 7 is required for these workflow tests on CI (provided by both GitHub runner images); local runs without PowerShell report them as skipped.
+
+## CI and releases
+
+[CI](../.github/workflows/ci.yml) runs on pull requests: frontend, browser interactions, reproducible icons, Rust formatting/tests/Clippy and Windows desktop Clippy with Win32 popup/window-ownership and isolated autostart-registry tests. Pull requests skip the Rust and Windows jobs when they touch nothing those jobs check. A failed browser test run uploads the Playwright report as an artifact. [Desktop Release](../.github/workflows/desktop-release.yml) is started by hand on `main`: the full CI for that commit, then the unsigned Windows EXE with a generated changelog on the [Releases page](https://github.com/fo0/repo-watch/releases).
