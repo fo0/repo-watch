@@ -59,6 +59,7 @@ fn a_listing_selects_the_newest_pushes_and_every_repository_of_a_favorite() {
         listing(listed, false),
         &[pin("github-1:1")],
         &[],
+        &[],
     );
     let mut expected = ids([1]);
     expected.extend(ids(3..=12));
@@ -72,7 +73,7 @@ fn a_cut_off_listing_ranks_a_kept_repository_by_its_last_known_push() {
     let accounts = [account("github-1")];
     let previous = vec![repo(99, Some(30), true), repo(98, Some(31), false)];
     let listed: Vec<_> = (1..=10).map(|n| repo(n, Some(n), false)).collect();
-    let merged = merge_catalog(&previous, &accounts, listing(listed, true), &[], &[]);
+    let merged = merge_catalog(&previous, &accounts, listing(listed, true), &[], &[], &[]);
     // 99 stays, still among the newest; 98 was not selected, so the cut drops it.
     let mut expected = ids(2..=10);
     expected.extend(ids([99]));

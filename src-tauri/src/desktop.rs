@@ -151,6 +151,19 @@ async fn set_repo_hidden(
     })
     .await
 }
+/// Sets the repository owners an account watches; no owners watches all of them again. The
+/// selection applies at once.
+#[tauri::command]
+async fn set_owner_filter(
+    app: tauri::AppHandle,
+    account_id: String,
+    owners: Vec<String>,
+) -> Result<Snapshot, String> {
+    work(app, move |engine| {
+        engine.set_owner_filter(account_id, owners)
+    })
+    .await
+}
 #[tauri::command]
 async fn open_repository(app: tauri::AppHandle, repo_id: String) -> Result<Snapshot, String> {
     work(app, |engine| engine.open_repository(repo_id)).await
@@ -428,6 +441,7 @@ pub fn run() {
             cancel_run,
             open_repository,
             set_repo_hidden,
+            set_owner_filter,
             crate::desktop_auth::connect_token,
             crate::desktop_auth::browser_auth_config,
             crate::desktop_auth::start_browser_auth,

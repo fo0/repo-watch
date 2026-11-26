@@ -75,6 +75,7 @@ impl<T: Transport> LiveStore<T> {
             listings,
             &self.data.pins,
             &self.hidden,
+            &self.owner_filters,
         );
         // Before the loop below, so a repository opened from the search keeps its history.
         self.keep_browsed();

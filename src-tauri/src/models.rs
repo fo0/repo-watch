@@ -184,6 +184,27 @@ pub struct Snapshot {
     /// Repositories the user hid from the panel lists; omitted when none.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub hidden_repos: Vec<HiddenRepo>,
+    /// The owners each account watches, for accounts with a filter; omitted when none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub owner_filters: Vec<OwnerFilter>,
+}
+
+/// The repository owners (the personal account, organizations) an account watches. An account
+/// without a filter watches all of its owners.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OwnerFilter {
+    pub account_id: String,
+    pub owners: Vec<String>,
+}
+
+impl OwnerFilter {
+    /// Whether the filter names this owner; GitHub logins compare case-insensitively.
+    pub fn watches(&self, owner: &str) -> bool {
+        self.owners
+            .iter()
+            .any(|known| known.to_lowercase() == owner.to_lowercase())
+    }
 }
 
 /// A repository the user hid from the panel lists, by account and repository. Owner and name

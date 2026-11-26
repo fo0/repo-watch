@@ -18,6 +18,8 @@ mod local_identity;
 /// The refresh and dispatch orchestration against a synthetic GitHub. No real account,
 /// token or repository is involved; every name below is a labelled fixture.
 mod orchestration;
+/// The owners each account watches: the freed places, restarts, validation and disconnects.
+mod owners;
 /// The user's refresh interval: stored, validated, and followed by the catalog.
 mod refresh_interval;
 mod refresh_scope;
