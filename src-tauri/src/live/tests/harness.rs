@@ -57,13 +57,16 @@ pub(super) fn confirmation(repo: u64, id: u64) -> Result<ApiResponse, TransportE
     )
 }
 
-/// Synthetic GitHub: accounts list `fixture-owner/fixture-<n>` repositories, each with
+/// Synthetic GitHub: accounts list `fixture-owner/fixture-<n>` repositories (or another
+/// owner's, see `owners`), each with
 /// one startable workflow (ID 9) on every known branch and tag.
 #[derive(Default)]
 pub(super) struct Remote {
     pub(super) repos: BTreeMap<String, Vec<u64>>,
     /// `pushed_at` of a listed repository; unlisted ones carry none.
     pub(super) pushed: BTreeMap<u64, String>,
+    /// Owner login of a listed repository; unlisted ones belong to `fixture-owner`.
+    pub(super) owners: BTreeMap<u64, &'static str>,
     /// Status every request of an account is answered with (401: revoked).
     pub(super) account_status: BTreeMap<String, u16>,
     /// Accounts whose vault entry is gone: the transport fails before sending, as
@@ -290,11 +293,11 @@ impl Transport for Fake {
                     .cloned()
                     .unwrap_or_default()
                     .into_iter()
-                    .map(|n| serde_json::json!({"id": n, "name": format!("fixture-{n}"), "owner": {"login": "fixture-owner"}, "default_branch": "main", "pushed_at": remote.pushed.get(&n), "permissions": {"push": true}}))
+                    .map(|n| serde_json::json!({"id": n, "name": format!("fixture-{n}"), "owner": {"login": remote.owners.get(&n).copied().unwrap_or("fixture-owner")}, "default_branch": "main", "pushed_at": remote.pushed.get(&n), "permissions": {"push": true}}))
                     .collect();
                 json(200, Value::Array(listed))
             }
-            ["repos", "fixture-owner", name, rest @ ..] => {
+            ["repos", _owner, name, rest @ ..] => {
                 let repo = name.trim_start_matches("fixture-").parse().unwrap();
                 remote.repository(request.method(), repo, rest, &query)
             }

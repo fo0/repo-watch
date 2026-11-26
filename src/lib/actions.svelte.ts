@@ -1,5 +1,5 @@
-// Cancelling open runs, loading repositories the search found and hiding
-// repositories from the lists.
+// Cancelling open runs, loading repositories the search found, hiding
+// repositories from the lists and choosing the owners an account watches.
 import { tick } from 'svelte';
 import type { NoticeTone } from './StatusBanners.svelte';
 import type { Bridge } from './demo';
@@ -15,7 +15,7 @@ import type { HiddenRepo, Repo, Run, Snapshot } from './types';
 
 type ActionPort = Pick<
   Bridge,
-  'cancelRun' | 'openRepository' | 'setRepoHidden'
+  'cancelRun' | 'openRepository' | 'setRepoHidden' | 'setOwnerFilter'
 >;
 /** The notice of one hidden repository and its „Rückgängig“. */
 const hideNotice = (accountId: string, repoId: string) =>
@@ -162,6 +162,15 @@ export class Actions {
     );
     this.#accept(ticket, value);
     this.#forget(hideNotice(entry.accountId, entry.repoId));
+  };
+
+  /**
+   * Sets the owners an account watches from the settings (none: all).
+   * Rejects with the shell's message, which the dialog shows.
+   */
+  setOwners = async (accountId: string, owners: string[]) => {
+    const ticket = this.#ticket();
+    this.#accept(ticket, await this.#bridge.setOwnerFilter(accountId, owners));
   };
 
   async #restore(repo: Repo) {

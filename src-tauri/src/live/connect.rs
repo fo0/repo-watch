@@ -221,6 +221,7 @@ impl<T: Transport> LiveStore<T> {
         self.schedule.forget_account(account, &self.data.repos);
         self.claims.retain(|claim| claim.account_id != account);
         self.forget_hidden(account);
+        self.forget_owner_filter(account);
         self.data.accounts.retain(|a| a.id != account);
         self.data.repos.retain(|r| r.account_id != account);
         self.data.pins.retain(|p| p.account_id != account);

@@ -85,6 +85,7 @@
   .update-panel .secondary-button[aria-disabled='true'],
   .favorite-button[aria-disabled='true'],
   .save-pin .secondary-button[aria-disabled='true'],
+  .owner-row .secondary-button[aria-disabled='true'],
   .pin-row .pin-heart[aria-disabled='true'] {
     color: GrayText;
   }

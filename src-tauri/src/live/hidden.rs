@@ -127,11 +127,11 @@ impl<T: Transport> LiveStore<T> {
         Ok(())
     }
 
-    /// The automatic selection over the known catalog, as the next listing would make it,
-    /// keeping the repositories opened from the search. A newly selected repository loads its
-    /// initial history on the next refresh; a deselected one's runs leave the snapshot, as a
-    /// refresh would drop them.
-    fn reselect(&mut self) {
+    /// The automatic selection over the known catalog, as the next listing would make it
+    /// (hidden repositories and owner filters included), keeping the repositories opened from
+    /// the search. A newly selected repository loads its initial history on the next refresh;
+    /// a deselected one's runs leave the snapshot, as a refresh would drop them.
+    pub(super) fn reselect(&mut self) {
         let before: BTreeSet<_> = self
             .data
             .repos
@@ -139,7 +139,12 @@ impl<T: Transport> LiveStore<T> {
             .filter(|repo| repo.selected)
             .map(|repo| repo.id.clone())
             .collect();
-        auto_select(&mut self.data.repos, &self.data.pins, &self.hidden);
+        auto_select(
+            &mut self.data.repos,
+            &self.data.pins,
+            &self.hidden,
+            &self.owner_filters,
+        );
         self.keep_browsed();
         let selected: BTreeSet<_> = self
             .data

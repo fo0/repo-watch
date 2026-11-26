@@ -41,8 +41,8 @@ impl DemoStore {
     pub fn new() -> Self {
         let mut snapshot: Snapshot = serde_json::from_str(FIXTURE)
             .expect("bundled demo fixture must match the checked TypeScript contract");
-        // The same automatic rule as a live catalog listing; the demo hides nothing.
-        auto_select(&mut snapshot.repos, &snapshot.pins, &[]);
+        // The same automatic rule as a live catalog listing; the demo hides and filters nothing.
+        auto_select(&mut snapshot.repos, &snapshot.pins, &[], &[]);
         let started = Instant::now();
         let simulated_runs = snapshot
             .runs

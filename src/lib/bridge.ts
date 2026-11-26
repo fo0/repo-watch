@@ -24,6 +24,8 @@ const nativeBridge: Bridge = {
   openRepository: (repoId) => call('open_repository', { repoId }),
   setRepoHidden: (accountId, repoId, hidden) =>
     call('set_repo_hidden', { accountId, repoId, hidden }),
+  setOwnerFilter: (accountId, owners) =>
+    call('set_owner_filter', { accountId, owners }),
   refreshInterval: () => call('refresh_interval'),
   setRefreshInterval: (seconds) => call('set_refresh_interval', { seconds }),
   logLevel: () => call('log_level'),

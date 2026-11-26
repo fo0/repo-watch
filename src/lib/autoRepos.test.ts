@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AUTO_REPOS, autoSelect } from './autoRepos';
-import type { HiddenRepo, Pin, Repo } from './types';
+import type { HiddenRepo, OwnerFilter, Pin, Repo } from './types';
 
 const repo = (
   accountId: string,
@@ -102,6 +102,55 @@ describe('autoSelect', () => {
     expect(kept).toContain('a:r0');
     expect(kept.filter((id) => id.startsWith('a:'))).toHaveLength(
       AUTO_REPOS + 1,
+    );
+  });
+});
+
+describe('autoSelect with an owner filter', () => {
+  const watch = (accountId: string, owners: string[]): OwnerFilter => ({
+    accountId,
+    owners,
+  });
+  /** Account a: the odd repositories belong to `fixture-org`. */
+  const repos = [
+    ...Array.from({ length: 2 * AUTO_REPOS + 2 }, (_, n) => ({
+      ...repo('a', `r${String(n).padStart(2, '0')}`, day(n + 1)),
+      ...(n % 2 ? { owner: 'fixture-org' } : {}),
+    })),
+    { ...repo('b', 'r21', day(28)), owner: 'fixture-org' },
+  ];
+
+  it('hands the places of a left-out owner to the next ones, per account', () => {
+    const picked = shown(
+      autoSelect(repos, [], [], [watch('a', ['Fixture-Owner'])]),
+    );
+    expect(picked).toEqual([
+      ...Array.from(
+        { length: AUTO_REPOS },
+        (_, n) => `a:r${String(2 * n + 2).padStart(2, '0')}`,
+      ),
+      'b:r21',
+    ]);
+  });
+
+  it('keeps the repository of a favorite outside the filter without a place', () => {
+    const picked = shown(
+      autoSelect(
+        repos,
+        [pin('a', 'a:r21')],
+        [],
+        [watch('a', ['fixture-owner'])],
+      ),
+    );
+    expect(picked).toContain('a:r21');
+    expect(picked).not.toContain('a:r19');
+    expect(picked).toContain('a:r02');
+    expect(picked).toHaveLength(AUTO_REPOS + 2);
+  });
+
+  it('watches every owner without owners in the filter', () => {
+    expect(shown(autoSelect(repos, [], [], [watch('a', [])]))).toEqual(
+      shown(autoSelect(repos, [])),
     );
   });
 });

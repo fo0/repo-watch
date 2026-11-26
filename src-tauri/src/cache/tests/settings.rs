@@ -1,4 +1,5 @@
-//! The app-wide settings row: notifications, the refresh interval and hidden repositories.
+//! The app-wide settings row: notifications, the refresh interval, hidden repositories and
+//! owner filters.
 use super::super::*;
 use super::{remove_db, temp_db};
 
@@ -81,6 +82,36 @@ fn hidden_repositories_round_trip_and_an_older_row_hides_nothing() {
     assert!(encode(&loaded)
         .unwrap()
         .contains(r#""hiddenRepos":[{"accountId""#));
+}
+
+#[test]
+fn owner_filters_round_trip_and_an_older_row_filters_nothing() {
+    let cache = Cache::in_memory().unwrap();
+    // A row from before owner filters existed.
+    cache
+        .write_settings_row(
+            APP_SETTINGS_KEY,
+            r#"{"notifications":true,"refreshSeconds":300}"#,
+        )
+        .unwrap();
+    let older = cache.load_app_settings().unwrap();
+    assert!(older.owner_filters.is_empty());
+    // An empty list is not written, so an older build reads the row unchanged.
+    assert!(!encode(&older).unwrap().contains("owner"));
+    let filtered = AppSettings {
+        owner_filters: vec![OwnerFilter {
+            account_id: "github-1".into(),
+            owners: vec!["fixture-owner".into(), "fixture-org".into()],
+        }],
+        ..older
+    };
+    cache.save_app_settings(&filtered).unwrap();
+    let loaded = cache.load_app_settings().unwrap();
+    assert_eq!(loaded, filtered);
+    assert!(loaded.notifications && loaded.refresh_interval() == 300);
+    assert!(encode(&loaded).unwrap().contains(
+        r#""ownerFilters":[{"accountId":"github-1","owners":["fixture-owner","fixture-org"]}]"#
+    ));
 }
 
 #[test]

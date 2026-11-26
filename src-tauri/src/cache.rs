@@ -2,7 +2,7 @@
 //! Credentials have no column, API, or serialization path in this module.
 
 use crate::i18n::tr;
-use crate::models::{DispatchTarget, HiddenRepo, Pin, Snapshot, UncertainStart};
+use crate::models::{DispatchTarget, HiddenRepo, OwnerFilter, Pin, Snapshot, UncertainStart};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -72,6 +72,10 @@ pub struct AppSettings {
     /// Repositories the user hid from the panel lists (ADR-0008); not written when empty.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub hidden_repos: Vec<HiddenRepo>,
+    /// The owners each account watches (`OwnerFilter`); not written when empty, and a row
+    /// without it filters nothing.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub owner_filters: Vec<OwnerFilter>,
     /// The log level; absent means info, and so does a value this build does not know.
     #[serde(
         skip_serializing_if = "Option::is_none",

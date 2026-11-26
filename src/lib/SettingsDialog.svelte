@@ -11,6 +11,8 @@
   import { HiddenChoice } from './hiddenChoice.svelte';
   import { m } from './i18n/index.svelte';
   import { LogChoice } from './logChoice.svelte';
+  import { OwnerChoice } from './ownerChoice.svelte';
+  import { ownerRows } from './ownerFilter';
   import { RefreshChoice } from './refresh.svelte';
   import {
     SETTINGS_TABS,
@@ -39,6 +41,7 @@
     onReset,
     onDisconnect,
     onUnhide,
+    onSetOwners,
   }: {
     snapshot: Snapshot | null;
     native: boolean;
@@ -63,6 +66,7 @@
     onReset: () => Promise<unknown>;
     onDisconnect: (id: string) => Promise<unknown>;
     onUnhide: (entry: HiddenRepo) => Promise<unknown>;
+    onSetOwners: (accountId: string, owners: string[]) => Promise<unknown>;
   } = $props();
 
   // Simple settings are staged and applied together by „Speichern“; account
@@ -77,6 +81,7 @@
   const appearance = new AppearanceChoice(bridge);
   const autostart = new Autostart(untrack(() => native));
   const refresh = new RefreshChoice(bridge);
+  const owners = new OwnerChoice();
   const hidden = new HiddenChoice();
   const log = new LogChoice(bridge);
   onDestroy(() => {
@@ -93,6 +98,7 @@
       : accountId,
   );
   const draftScenario = $derived(scenarioChoice ?? scenario);
+  const rows = $derived(ownerRows(snapshot));
   const changed = $derived({
     account: native && account !== accountId,
     scenario: demo && draftScenario !== scenario,
@@ -101,6 +107,7 @@
     autostart: autostart.pending !== null,
     refresh: refresh.pending,
     log: log.pending,
+    owners: owners.pendingIn(rows),
     hidden: hidden.pendingIn(snapshot?.hiddenRepos ?? []),
   });
   const dirty = $derived(Object.values(changed).some(Boolean));
@@ -165,6 +172,7 @@
       if (pending.language) appearance.applyLanguage();
       if (pending.refresh) await refresh.apply();
       if (pending.log) await log.apply();
+      if (pending.owners) await owners.apply(rows, onSetOwners);
       if (pending.hidden)
         await hidden.apply(snapshot?.hiddenRepos ?? [], onUnhide);
       if (pending.autostart) await autostart.apply();
@@ -259,6 +267,7 @@
         {native}
         {appearance}
         {refresh}
+        {owners}
         {hidden}
         {log}
         {autostart}

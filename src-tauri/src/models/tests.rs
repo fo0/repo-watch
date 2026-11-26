@@ -1,4 +1,4 @@
-//! Pin and request bounds, git ref rules and the bounded outcome cache.
+//! Pin and request bounds, git ref rules, the bounded outcome cache and the owner filter.
 use super::*;
 
 fn pin(id: &str, label: &str) -> Pin {
@@ -119,4 +119,43 @@ fn recent_outcomes_evict_the_oldest_entry_and_keep_updates_in_place() {
     assert_eq!(outcomes.get(&"a"), None);
     assert_eq!(outcomes.get(&"b"), Some(&2));
     assert_eq!(outcomes.get(&"c"), Some(&4));
+}
+
+#[test]
+fn an_owner_filter_speaks_the_panel_contract_and_ignores_letter_case() {
+    let filter = OwnerFilter {
+        account_id: "github-1".into(),
+        owners: vec!["fixture-owner".into()],
+    };
+    let value = serde_json::to_value(&filter).unwrap();
+    assert_eq!(
+        value,
+        serde_json::json!({"accountId": "github-1", "owners": ["fixture-owner"]})
+    );
+    assert_eq!(
+        serde_json::from_value::<OwnerFilter>(value).unwrap(),
+        filter
+    );
+    assert!(filter.watches("Fixture-Owner"));
+    assert!(!filter.watches("fixture-org"));
+}
+
+#[test]
+fn a_snapshot_omits_owner_filters_when_none_and_reads_an_older_one() {
+    // A snapshot from before owner filters existed.
+    let older = serde_json::json!({
+        "accounts": [], "repos": [], "workflows": [], "runs": [], "pins": [],
+        "mode": "live", "connectivity": "online", "updatedAt": "2026-10-01T08:00:00Z",
+        "stale": false
+    });
+    let mut snapshot: Snapshot = serde_json::from_value(older).unwrap();
+    assert!(snapshot.owner_filters.is_empty());
+    let value = serde_json::to_value(&snapshot).unwrap();
+    assert!(value.get("ownerFilters").is_none());
+    snapshot.owner_filters = vec![OwnerFilter {
+        account_id: "github-1".into(),
+        owners: vec!["fixture-org".into()],
+    }];
+    let value = serde_json::to_value(&snapshot).unwrap();
+    assert_eq!(value["ownerFilters"][0]["owners"][0], "fixture-org");
 }

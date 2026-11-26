@@ -73,20 +73,38 @@ describe('IPC contract', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('passes set_repo_hidden the arguments its Rust handler names', () => {
+  /** Parameter names of one Rust handler as the camelCase keys Tauri reads. */
+  function handlerArgs(command: string): string[] {
     const source = read('src-tauri/src/desktop.rs');
-    const params = /async fn set_repo_hidden\(([^)]*)\)/.exec(source)?.[1];
-    const names = (params ?? '')
-      .split(',')
-      .map((param) => param.split(':')[0]!.trim())
-      .filter((name) => name && name !== 'app')
-      // Tauri reads camelCase keys for snake_case parameters.
-      .map((name) => name.replace(/_(\w)/g, (_, c: string) => c.toUpperCase()));
+    const params = new RegExp(`async fn ${command}\\(([^)]*)\\)`).exec(
+      source,
+    )?.[1];
+    return (
+      (params ?? '')
+        .split(',')
+        .map((param) => param.split(':')[0]!.trim())
+        .filter((name) => name && name !== 'app')
+        // Tauri reads camelCase keys for snake_case parameters.
+        .map((name) =>
+          name.replace(/_(\w)/g, (_, c: string) => c.toUpperCase()),
+        )
+    );
+  }
+
+  it('passes set_repo_hidden the arguments its Rust handler names', () => {
     const args: Commands['set_repo_hidden']['args'] = {
       accountId: 'a',
       repoId: 'r',
       hidden: true,
     };
-    expect(names).toEqual(Object.keys(args));
+    expect(handlerArgs('set_repo_hidden')).toEqual(Object.keys(args));
+  });
+
+  it('passes set_owner_filter the arguments its Rust handler names', () => {
+    const args: Commands['set_owner_filter']['args'] = {
+      accountId: 'a',
+      owners: ['o'],
+    };
+    expect(handlerArgs('set_owner_filter')).toEqual(Object.keys(args));
   });
 });

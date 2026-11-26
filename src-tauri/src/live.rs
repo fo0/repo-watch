@@ -5,8 +5,9 @@
 //! accounts), `refresh` (catalog, metadata and run orchestration), `schedule` (per-scope
 //! refresh timers), `catalog` (repository and ref listings), `last_run` (the latest run of
 //! workflows without known runs), `browse` (repositories opened from the panel search),
-//! `dispatch` (claimed, exactly-once workflow starts), `cancel` (run cancellation) and
-//! `hidden` (repositories the user hid from the panel lists).
+//! `dispatch` (claimed, exactly-once workflow starts), `cancel` (run cancellation),
+//! `hidden` (repositories the user hid from the panel lists) and `owners` (the repository
+//! owners each account watches).
 use crate::{
     auth::NativeKeyring,
     cache::{AppSettings, Cache, CacheError},
@@ -29,6 +30,7 @@ mod connect;
 mod dispatch;
 mod hidden;
 mod last_run;
+mod owners;
 mod refresh;
 mod schedule;
 mod transport;
@@ -90,6 +92,7 @@ pub fn empty_snapshot() -> Snapshot {
         ),
         uncertain_starts: vec![],
         hidden_repos: vec![],
+        owner_filters: vec![],
     }
 }
 fn cache_notice() -> &'static str {
@@ -179,6 +182,8 @@ pub struct LiveStore<T: Transport = HttpTransport> {
     refresh_seconds: u64,
     /// Repositories the user hid (`AppSettings::hidden_repos`), kept in step on save.
     hidden: Vec<HiddenRepo>,
+    /// The owners each account watches (`AppSettings::owner_filters`), kept in step on save.
+    owner_filters: Vec<OwnerFilter>,
     /// The failing scopes last written to the log, so a lasting failure is logged once.
     failure_log: crate::app_log::FailureLog,
 }
@@ -224,11 +229,12 @@ impl<T: Transport> LiveStore<T> {
                 "Start locks could not be loaded.",
             )
         })?;
-        // An unreadable preference keeps the default interval and hides nothing.
+        // An unreadable preference keeps the default interval and hides or filters nothing.
         let settings = cache.load_app_settings().unwrap_or_default();
         let refresh_seconds = settings.refresh_interval();
         crate::app_log::set_level(settings.log_level.unwrap_or_default());
         let hidden = settings.hidden_repos;
+        let owner_filters = settings.owner_filters;
         if !data.accounts.is_empty() {
             data.stale = true;
             data.connectivity = Connectivity::Offline;
@@ -255,6 +261,7 @@ impl<T: Transport> LiveStore<T> {
             clock: now,
             refresh_seconds,
             hidden,
+            owner_filters,
             failure_log: crate::app_log::FailureLog::default(),
         })
     }
@@ -264,6 +271,7 @@ impl<T: Transport> LiveStore<T> {
         let mut snapshot = self.data.clone();
         snapshot.uncertain_starts = self.claims.clone();
         snapshot.hidden_repos = self.hidden_of_accounts();
+        snapshot.owner_filters = self.owner_filters_of_accounts();
         let denied: BTreeSet<_> = snapshot
             .repos
             .iter()

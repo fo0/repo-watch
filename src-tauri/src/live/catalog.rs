@@ -165,7 +165,8 @@ pub(super) fn account_repos<T: Transport>(
 }
 
 /// Listed accounts take their fresh repositories and select them automatically
-/// (`auto_select`: the newest pushes without hidden ones, plus the repositories of
+/// (`auto_select`: the newest pushes without hidden ones or owners the account's filter leaves
+/// out, plus the repositories of
 /// favorites); unlisted accounts keep their last known ones and their selection. A cut-off
 /// listing cannot prove that a selected repository went away, so a selected repository
 /// missing from it stays and is ranked with the listed ones by its last known push.
@@ -175,6 +176,7 @@ pub(super) fn merge_catalog(
     mut listings: BTreeMap<String, AccountRepos>,
     pins: &[Pin],
     hidden: &[HiddenRepo],
+    owners: &[OwnerFilter],
 ) -> Vec<Repo> {
     let mut repos = vec![];
     for account in accounts {
@@ -189,7 +191,7 @@ pub(super) fn merge_catalog(
         }
         let mut seen = BTreeSet::new();
         fresh.retain(|repo| seen.insert(repo.id.clone()));
-        auto_select(&mut fresh, pins, hidden);
+        auto_select(&mut fresh, pins, hidden, owners);
         repos.extend(fresh);
     }
     let mut seen = BTreeSet::new();

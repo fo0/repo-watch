@@ -37,6 +37,17 @@ export const settings = {
     recommended: 'Empfohlen',
     custom: 'Eigener Wert',
   },
+  owners: {
+    heading: 'Organisationen',
+    /** Group label of one account's owners. */
+    account: (login: string) => `Organisationen von ${login}`,
+    /** Tooltip of an owner toggle. */
+    watched: (owner: string) => `${owner}: beobachtet`,
+    ignored: (owner: string) => `${owner}: ausgeblendet`,
+    /** Tooltip of the last watched owner, which cannot be released. */
+    last: 'Mindestens eine bleibt beobachtet',
+    notFound: 'Konto nicht gefunden.',
+  },
   hidden: {
     heading: 'Ausgeblendete Repositories',
     show: 'Einblenden',
