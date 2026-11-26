@@ -194,16 +194,23 @@ fn a_favorite_keeps_its_repository_outside_the_filter_polled() {
 }
 
 #[test]
-fn a_repository_opened_from_the_search_stays_selected() {
+fn a_repository_opened_from_the_search_stays_selected_while_its_owner_is_watched() {
     let mut h = eleven();
-    // 11 was opened from the search; a filter that leaves its owner out keeps it open.
+    // 11 was opened from the search; a filter that keeps its owner keeps it open.
     h.live.open_repository("github-1:11".into()).unwrap();
+    let snapshot = h
+        .live
+        .set_owner_filter("github-1".into(), owners(&["fixture-owner"]))
+        .unwrap();
+    assert!(selected(&snapshot).contains(&"github-1:11".to_string()));
+    assert!(h.live.browsed.contains("github-1:11"));
+    // A filter that leaves its owner out drops the hold, as hiding does.
     let snapshot = h
         .live
         .set_owner_filter("github-1".into(), owners(&["fixture-org"]))
         .unwrap();
-    assert_eq!(selected(&snapshot), ids([2, 4, 6, 8, 10, 11]));
-    assert!(h.live.browsed.contains("github-1:11"));
+    assert_eq!(selected(&snapshot), ids([2, 4, 6, 8, 10]));
+    assert!(!h.live.browsed.contains("github-1:11"));
 }
 
 #[test]

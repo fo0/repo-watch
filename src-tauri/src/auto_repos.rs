@@ -23,12 +23,12 @@ pub fn is_hidden(hidden: &[HiddenRepo], repo: &Repo) -> bool {
 }
 
 /// Whether the account's owner filter leaves this repository's owner out; an account without
-/// a filter watches all owners.
+/// a filter, or with one that names no owner, watches all owners.
 pub fn is_filtered_out(filters: &[OwnerFilter], repo: &Repo) -> bool {
     filters
         .iter()
         .find(|filter| filter.account_id == repo.account_id)
-        .is_some_and(|filter| !filter.watches(&repo.owner))
+        .is_some_and(|filter| !filter.owners.is_empty() && !filter.watches(&repo.owner))
 }
 
 /// Selects, per account, the `AUTO_REPOS` repositories with the newest push (a missing or
@@ -263,6 +263,8 @@ mod tests {
             "the 11th of its owner stays out"
         );
         assert!(picked.contains(&"b:r21"), "the filter is per account");
+        // A filter that names no owner filters nothing.
+        assert!(!is_filtered_out(&[watch("a", &[])], &repos[1]));
     }
 
     #[test]

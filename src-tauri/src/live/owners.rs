@@ -5,7 +5,7 @@
 //! favorite keeps it selected.
 use super::{hidden::hidden_save_failed, LiveStore};
 use crate::i18n::tr;
-use crate::{cache::AppSettings, github::Transport, models::*};
+use crate::{auto_repos::is_filtered_out, cache::AppSettings, github::Transport, models::*};
 
 /// Owners one filter names at most; GitHub accounts rarely belong to that many organizations.
 pub(super) const MAX_OWNERS: usize = 100;
@@ -52,7 +52,8 @@ impl<T: Transport> LiveStore<T> {
     /// Sets the owners a connected account watches, replacing its earlier filter; no owners
     /// removes the filter, so the account watches all of them again. The automatic selection
     /// is re-applied to the known catalog at once; the next refresh loads a repository that
-    /// moved up. Repositories opened from the search stay selected.
+    /// moved up. A repository opened from the search stays selected unless the new filter
+    /// leaves its owner out: like a hidden one, it then gives up that hold.
     pub fn set_owner_filter(
         &mut self,
         account_id: String,
@@ -78,6 +79,15 @@ impl<T: Transport> LiveStore<T> {
             return Ok(self.snapshot());
         }
         self.save_owner_filters(next)?;
+        let left_out: Vec<_> = self
+            .data
+            .repos
+            .iter()
+            .filter(|repo| is_filtered_out(&self.owner_filters, repo))
+            .map(|repo| repo.id.clone())
+            .collect();
+        self.browsed
+            .retain(|id| !left_out.iter().any(|out| out == id));
         self.reselect();
         Ok(self.snapshot())
     }
