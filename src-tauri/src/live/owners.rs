@@ -3,9 +3,9 @@
 //! (`Repo::owner`), so choosing them needs no GitHub request. A repository whose owner the
 //! filter leaves out is treated like a hidden one: it gives up its automatic place, and only a
 //! favorite keeps it selected.
-use super::{hidden::hidden_save_failed, LiveStore};
+use super::LiveStore;
 use crate::i18n::tr;
-use crate::{auto_repos::is_filtered_out, cache::AppSettings, github::Transport, models::*};
+use crate::{auto_repos::is_filtered_out, github::Transport, models::*};
 
 /// Owners one filter names at most; GitHub accounts rarely belong to that many organizations.
 pub(super) const MAX_OWNERS: usize = 100;
@@ -34,10 +34,8 @@ fn normalized(owners: Vec<String>) -> Result<Vec<String>, String> {
         {
             return Err(owner_invalid().into());
         }
-        if kept
-            .iter()
-            .any(|known| known.to_lowercase() == owner.to_lowercase())
-        {
+        let key = owner.to_lowercase();
+        if kept.iter().any(|known| known.to_lowercase() == key) {
             continue;
         }
         if kept.len() >= MAX_OWNERS {
@@ -125,11 +123,7 @@ impl<T: Transport> LiveStore<T> {
 
     /// Writes the filters into the settings row, keeping its other preferences.
     fn save_owner_filters(&mut self, filters: Vec<OwnerFilter>) -> Result<(), String> {
-        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
-        settings.owner_filters = filters;
-        self.cache
-            .save_app_settings(&settings)
-            .map_err(|_| hidden_save_failed())?;
+        let settings = self.update_app_settings(|settings| settings.owner_filters = filters)?;
         self.owner_filters = settings.owner_filters;
         Ok(())
     }

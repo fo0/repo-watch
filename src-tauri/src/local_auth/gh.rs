@@ -127,12 +127,10 @@ pub(super) fn gh_accounts(bytes: &[u8]) -> Result<Vec<LocalAccount>, String> {
                 .token_source
                 .to_ascii_uppercase()
                 .ends_with("_TOKEN");
-        let scopes: Vec<_> = account
+        let repo = account
             .scopes
             .split([',', ' ', '\''])
-            .filter(|s| !s.is_empty())
-            .collect();
-        let repo = scopes.contains(&"repo");
+            .any(|scope| scope == "repo");
         accounts.push(LocalAccount {
             source: "gh".into(),
             host: account.host.clone(),

@@ -101,6 +101,13 @@ fn cache_notice() -> &'static str {
         "Local cache could not be updated.",
     )
 }
+/// Any preference of the app settings row (`update_app_settings`).
+fn settings_save_failed() -> &'static str {
+    tr(
+        "Einstellung konnte nicht gespeichert werden.",
+        "Setting could not be saved.",
+    )
+}
 fn account_save_failed() -> &'static str {
     tr(
         "Konto konnte nicht lokal gespeichert werden. Es wurde nichts verbunden; versuche es erneut.",
@@ -290,11 +297,21 @@ impl<T: Transport> LiveStore<T> {
             .is_ok_and(|settings| settings.notifications)
     }
     pub fn set_notifications_enabled(&mut self, enabled: bool) -> Result<(), String> {
-        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
-        settings.notifications = enabled;
+        self.update_app_settings(|settings| settings.notifications = enabled)?;
+        Ok(())
+    }
+    /// Changes preferences of the settings row and writes it, keeping the others; an
+    /// unreadable row starts from the defaults. Returns the row as written.
+    fn update_app_settings(
+        &self,
+        change: impl FnOnce(&mut AppSettings),
+    ) -> Result<AppSettings, String> {
+        let mut settings = self.cache.load_app_settings().unwrap_or_default();
+        change(&mut settings);
         self.cache
             .save_app_settings(&settings)
-            .map_err(|_| hidden::hidden_save_failed().into())
+            .map_err(|_| settings_save_failed())?;
+        Ok(settings)
     }
     /// Seconds between idle refreshes; an open run is still followed every 15 seconds.
     pub fn refresh_interval(&self) -> u64 {
@@ -304,11 +321,7 @@ impl<T: Transport> LiveStore<T> {
     /// account's next catalog read forward to within the new interval.
     pub fn set_refresh_interval(&mut self, seconds: u64) -> Result<u64, String> {
         let seconds = crate::refresh_interval::validate(seconds)?;
-        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
-        settings.refresh_seconds = Some(seconds);
-        self.cache
-            .save_app_settings(&settings)
-            .map_err(|_| hidden::hidden_save_failed())?;
+        self.update_app_settings(|settings| settings.refresh_seconds = Some(seconds))?;
         self.refresh_seconds = seconds;
         self.schedule.set_refresh(seconds, (self.clock)());
         Ok(seconds)
@@ -323,11 +336,7 @@ impl<T: Transport> LiveStore<T> {
         &mut self,
         level: crate::app_log::Level,
     ) -> Result<crate::app_log::Level, String> {
-        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
-        settings.log_level = Some(level);
-        self.cache
-            .save_app_settings(&settings)
-            .map_err(|_| hidden::hidden_save_failed())?;
+        self.update_app_settings(|settings| settings.log_level = Some(level))?;
         crate::app_log::set_level(level);
         crate::app_log::info(&format!("settings: log level={}", level.label()));
         Ok(level)

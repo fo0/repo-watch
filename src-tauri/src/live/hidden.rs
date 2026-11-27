@@ -3,19 +3,13 @@
 //! only a favorite keeps it selected.
 use super::LiveStore;
 use crate::i18n::tr;
-use crate::{auto_repos::auto_select, cache::AppSettings, github::Transport, models::*};
+use crate::{auto_repos::auto_select, github::Transport, models::*};
 use std::collections::BTreeSet;
 
 /// Hidden repositories kept at most; far below the settings row's size limit.
 pub(super) const MAX_HIDDEN_REPOS: usize = 1000;
 /// Longest account or repository ID a request may name.
 const MAX_ID_CHARS: usize = 200;
-pub(super) fn hidden_save_failed() -> &'static str {
-    tr(
-        "Einstellung konnte nicht gespeichert werden.",
-        "Setting could not be saved.",
-    )
-}
 pub(super) fn hidden_too_many() -> &'static str {
     tr(
         "Zu viele ausgeblendete Repositories.",
@@ -118,11 +112,7 @@ impl<T: Transport> LiveStore<T> {
 
     /// Writes the list into the settings row, keeping its other preferences.
     fn save_hidden(&mut self, hidden: Vec<HiddenRepo>) -> Result<(), String> {
-        let mut settings: AppSettings = self.cache.load_app_settings().unwrap_or_default();
-        settings.hidden_repos = hidden;
-        self.cache
-            .save_app_settings(&settings)
-            .map_err(|_| hidden_save_failed())?;
+        let settings = self.update_app_settings(|settings| settings.hidden_repos = hidden)?;
         self.hidden = settings.hidden_repos;
         Ok(())
     }
