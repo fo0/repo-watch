@@ -36,6 +36,8 @@ export const settings = {
     recommendedHint: 'Empfohlen: 1 min · laufende Runs alle 15 s',
     recommended: 'Empfohlen',
     custom: 'Eigener Wert',
+    /** Accessible name of the own value: the visible „s“ is hidden. */
+    customLabel: 'Eigener Wert in Sekunden',
   },
   owners: {
     heading: 'Organisationen',

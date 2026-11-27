@@ -27,6 +27,8 @@ test('the refresh interval stages on the slider or as an own value and applies o
   await openApp(page);
   await expect(slider(page)).toHaveAttribute('aria-valuetext', '1 min');
   await expect(custom(page)).toHaveValue('60');
+  // The unit „s“ is hidden from assistive tech; the name carries it.
+  await expect(custom(page)).toHaveAccessibleName('Eigener Wert in Sekunden');
   await expect(save(page)).toBeDisabled();
   // One stop up is staged, then dropped by „Abbrechen“.
   await slider(page).focus();

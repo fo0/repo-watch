@@ -61,6 +61,7 @@
       max={REFRESH_MAX}
       step="1"
       inputmode="numeric"
+      aria-label={m().settings.refresh.customLabel}
       value={Number.isNaN(choice.value) ? '' : choice.value}
       aria-invalid={valid ? undefined : 'true'}
       aria-describedby={valid ? undefined : 'refresh-error'}
