@@ -201,9 +201,10 @@ pub struct OwnerFilter {
 impl OwnerFilter {
     /// Whether the filter names this owner; GitHub logins compare case-insensitively.
     pub fn watches(&self, owner: &str) -> bool {
+        let owner = owner.to_lowercase();
         self.owners
             .iter()
-            .any(|known| known.to_lowercase() == owner.to_lowercase())
+            .any(|known| known.to_lowercase() == owner)
     }
 }
 

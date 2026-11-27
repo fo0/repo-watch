@@ -34,10 +34,8 @@ fn normalized(owners: Vec<String>) -> Result<Vec<String>, String> {
         {
             return Err(owner_invalid().into());
         }
-        if kept
-            .iter()
-            .any(|known| known.to_lowercase() == owner.to_lowercase())
-        {
+        let key = owner.to_lowercase();
+        if kept.iter().any(|known| known.to_lowercase() == key) {
             continue;
         }
         if kept.len() >= MAX_OWNERS {
