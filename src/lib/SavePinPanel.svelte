@@ -24,6 +24,9 @@
     valid: boolean;
     onSave: (asNew: boolean) => void;
   } = $props();
+  const uid = $props.id();
+  /** The help line describes the name field. */
+  const helpId = `${uid}-help`;
   const canSave = $derived(!saving && !locked && valid && !!label.trim());
   let details = $state<HTMLDetailsElement>();
   // Follows the prop only: as a template attribute, `open` was re-set with
@@ -59,6 +62,7 @@
     <label class="field"
       ><span>{m().favorites.save.name}</span><input
         aria-label={m().favorites.save.name}
+        aria-describedby={helpId}
         bind:value={label}
         onkeydown={(event) => {
           if (event.key !== 'Enter') return;
@@ -73,7 +77,7 @@
         placeholder={m().favorites.save.placeholder}
       /></label
     >
-    <p class="field-help">{m().favorites.save.help}</p>
+    <p class="field-help" id={helpId}>{m().favorites.save.help}</p>
     <!-- Off via aria-disabled, not disabled: a pressed save keeps focus
          here while it runs, and the tooltip names why it is off. -->
     <button

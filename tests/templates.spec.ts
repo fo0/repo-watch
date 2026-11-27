@@ -24,6 +24,10 @@ test('pins persist and the name opens their stored configuration', async ({
 }) => {
   let dialog = await openLaunch(page);
   await dialog.getByText('Als Favorit speichern', { exact: true }).click();
+  // The help line under the field is its description.
+  await expect(
+    dialog.getByLabel('Name des Favoriten'),
+  ).toHaveAccessibleDescription(/^Speichert Konto, Repository, Workflow/);
   await dialog.getByLabel('Name des Favoriten').fill('My saved build');
   await dialog
     .getByRole('button', { name: 'Favorit speichern', exact: true })
