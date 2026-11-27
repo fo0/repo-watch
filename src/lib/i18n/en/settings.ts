@@ -35,6 +35,7 @@ export const settings: typeof German = {
     recommendedHint: 'Recommended: 1 min · running runs every 15 s',
     recommended: 'Recommended',
     custom: 'Custom value',
+    customLabel: 'Custom value in seconds',
   },
   owners: {
     heading: 'Organizations',
