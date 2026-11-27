@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Icon from './Icon.svelte';
   import { startupNote, type Autostart } from './autostart.svelte';
+  import { focusLost } from './focus';
   import { m } from './i18n/index.svelte';
 
   // The switch stages a choice; the dialog's „Speichern“ writes it.
@@ -14,6 +15,25 @@
     status === 'disabledByWindows' || status === 'unknownApproval',
   );
   onMount(() => void autostart.read());
+
+  let checkbox = $state<HTMLInputElement>();
+  let actions = $state<HTMLElement>();
+  /** The repair buttons held the focus when they went. */
+  let refocus = $state(false);
+  // A repair that lets the switch work again removes its button, so focus
+  // would fall to <body> (WCAG 2.4.3): it moves to the switch instead.
+  $effect(() => {
+    const area = actions;
+    if (!area) return;
+    return () => {
+      if (area.contains(document.activeElement) || focusLost()) refocus = true;
+    };
+  });
+  $effect(() => {
+    if (!refocus || !checkbox || autostart.busy || !autostart.editable) return;
+    refocus = false;
+    if (focusLost()) checkbox.focus();
+  });
 </script>
 
 <svelte:window onfocus={() => void autostart.read()} />
@@ -32,6 +52,7 @@
     <label class="startup-option">
       <input
         type="checkbox"
+        bind:this={checkbox}
         checked={autostart.checked}
         disabled={autostart.busy || !autostart.editable}
         aria-describedby={note ? 'startup-status' : undefined}
@@ -49,7 +70,7 @@
         {note}
       </p>{/if}
     {#if autostart.loaded && !autostart.editable}
-      <div class="startup-actions">
+      <div class="startup-actions" bind:this={actions}>
         <!-- The read and the removal turn their own button off via
              aria-disabled, so a keyboard press keeps focus there. -->
         <button

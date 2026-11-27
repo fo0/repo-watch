@@ -158,6 +158,8 @@ test('Windows veto is shown at 360px, can open Windows settings and remove only 
     .click();
   await expect(checkbox).toBeEnabled();
   await expect(checkbox).not.toBeChecked();
+  // The removed repair button hands its focus to the switch, not <body>.
+  await expect(checkbox).toBeFocused();
   expect(await mutations(page)).toBe(1);
 });
 
@@ -174,6 +176,7 @@ test('external removal and Task Manager changes refresh on focus and explicit re
   await mock.configure({ status: 'disabled', registered: false });
   await page.getByRole('button', { name: 'Status prüfen' }).click();
   await expect(checkbox).toBeEnabled();
+  await expect(checkbox).toBeFocused();
   await expect(
     page.getByRole('button', { name: 'Autostarteintrag entfernen' }),
   ).toHaveCount(0);
