@@ -70,6 +70,23 @@ test('the refresh interval stages on the slider or as an own value and applies o
   await expect(save(page)).toBeDisabled();
 });
 
+test('Enter in the own value saves like „Speichern“, never with an invalid value', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await openApp(page);
+  // Out of range: Enter keeps the dialog open with its error.
+  await custom(page).fill('5');
+  await custom(page).press('Enter');
+  await expect(dialog(page)).toBeVisible();
+  await expect(custom(page)).toBeFocused();
+  expect(await stored(page)).toBeNull();
+  await custom(page).fill('45');
+  await custom(page).press('Enter');
+  await expect(dialog(page)).toHaveCount(0);
+  expect(await stored(page)).toBe('45');
+});
+
 test('the native shell reads the interval and receives the saved value', async ({
   page,
 }) => {

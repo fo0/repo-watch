@@ -272,6 +272,7 @@
         {log}
         {autostart}
         onOpenFolder={openLogFolder}
+        onSave={() => void save()}
       />
     {:else}
       <UpdatePanel

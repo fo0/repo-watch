@@ -13,7 +13,11 @@
   import type { RefreshChoice } from './refresh.svelte';
 
   // Slider and own value stage a choice; the dialog's „Speichern“ writes it.
-  let { choice }: { choice: RefreshChoice } = $props();
+  // Enter in the own value presses that „Speichern“ (`onSubmit`).
+  let {
+    choice,
+    onSubmit = () => {},
+  }: { choice: RefreshChoice; onSubmit?: () => void } = $props();
   const LAST = REFRESH_PRESETS.length - 1;
   const RECOMMENDED = presetIndex(REFRESH_DEFAULT);
   const valid = $derived(!choice.invalid);
@@ -66,6 +70,11 @@
       aria-invalid={valid ? undefined : 'true'}
       aria-describedby={valid ? undefined : 'refresh-error'}
       oninput={(event) => choice.stage(event.currentTarget.valueAsNumber)}
+      onkeydown={(event) => {
+        if (event.key !== 'Enter' || event.isComposing || event.repeat) return;
+        event.preventDefault();
+        onSubmit();
+      }}
     />
     <span aria-hidden="true">s</span>
   </label>
