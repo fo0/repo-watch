@@ -65,26 +65,30 @@
 </script>
 
 {#if step === 'choose'}
-  <div class="modal-body connect-step">
-    <h3 id="connect-step-title" tabindex="-1" bind:this={heading}>
-      {m().accounts.connect.chooseMethod}
-    </h3>
-    <ConnectMethods
-      bind:value={method}
-      localDisabled
-      localHint={m().accounts.connect.localDesktopOnly}
-    />
-  </div>
-  <div class="modal-actions">
-    <button type="button" class="secondary-button" onclick={onClose}
-      >{m().common.cancel}</button
-    >
-    <button
-      type="button"
-      class="primary-button"
-      onclick={() => (step = 'token')}>{m().common.next}</button
-    >
-  </div>
+  <!-- A form, so Enter on a method continues like its primary button. -->
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      step = 'token';
+    }}
+  >
+    <div class="modal-body connect-step">
+      <h3 id="connect-step-title" tabindex="-1" bind:this={heading}>
+        {m().accounts.connect.chooseMethod}
+      </h3>
+      <ConnectMethods
+        bind:value={method}
+        localDisabled
+        localHint={m().accounts.connect.localDesktopOnly}
+      />
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary-button" onclick={onClose}
+        >{m().common.cancel}</button
+      >
+      <button type="submit" class="primary-button">{m().common.next}</button>
+    </div>
+  </form>
 {:else if step === 'token'}
   <form onsubmit={submitExampleToken}>
     <div class="modal-body connect-step">

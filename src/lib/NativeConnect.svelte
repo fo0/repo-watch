@@ -84,22 +84,30 @@
 </script>
 
 {#if step === 'choose'}
-  <div class="modal-body connect-step">
-    <h3 id="connect-step-title" tabindex="-1" bind:this={heading}>
-      {m().accounts.connect.chooseMethod}
-    </h3>
-    <ConnectMethods bind:value={method} />
-  </div>
-  <div class="modal-actions">
-    <button type="button" class="secondary-button" onclick={onClose}
-      >{m().common.cancel}</button
-    >
-    <button type="button" class="primary-button" onclick={() => (step = method)}
-      >{method === 'local'
-        ? m().accounts.connect.checkLocal
-        : m().common.next}</button
-    >
-  </div>
+  <!-- A form, so Enter on a method continues like its primary button. -->
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      step = method;
+    }}
+  >
+    <div class="modal-body connect-step">
+      <h3 id="connect-step-title" tabindex="-1" bind:this={heading}>
+        {m().accounts.connect.chooseMethod}
+      </h3>
+      <ConnectMethods bind:value={method} />
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary-button" onclick={onClose}
+        >{m().common.cancel}</button
+      >
+      <button type="submit" class="primary-button"
+        >{method === 'local'
+          ? m().accounts.connect.checkLocal
+          : m().common.next}</button
+      >
+    </div>
+  </form>
 {:else if step === 'local'}
   <LocalAuth
     connectedAccounts={accounts}

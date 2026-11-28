@@ -26,6 +26,7 @@
     log,
     autostart,
     onOpenFolder,
+    onSave,
   }: {
     snapshot: Snapshot | null;
     native: boolean;
@@ -36,12 +37,14 @@
     log: LogChoice;
     autostart: Autostart;
     onOpenFolder: () => void;
+    /** The dialog's „Speichern“; it does nothing while saving is blocked. */
+    onSave: () => void;
   } = $props();
 </script>
 
 <LanguageSetting bind:value={appearance.language} />
 <ThemeSetting bind:value={appearance.theme} />
-<RefreshSetting choice={refresh} />
+<RefreshSetting choice={refresh} onSubmit={onSave} />
 <OwnerFilterSetting {snapshot} choice={owners} />
 <HiddenReposSetting {snapshot} choice={hidden} />
 <LogSetting choice={log} {native} {onOpenFolder} />

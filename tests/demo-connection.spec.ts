@@ -39,6 +39,18 @@ test('the demo offers the same method step: browser sign-in paused, local sign-i
   expect(page.context().pages()).toHaveLength(1);
 });
 
+test('Enter on the preselected token method continues to the token form', async ({
+  page,
+}) => {
+  const dialog = await openConnection(page);
+  await dialog.getByRole('radio', { name: /^Mit Token verbinden/ }).focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    dialog.getByRole('heading', { name: 'Mit Token verbinden' }),
+  ).toBeFocused();
+  await expect(dialog.getByLabel('Beispiel-Token')).toBeVisible();
+});
+
 test('cancelling a pending token preview invalidates its late confirmation', async ({
   page,
 }) => {

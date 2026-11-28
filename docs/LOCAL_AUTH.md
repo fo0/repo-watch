@@ -4,7 +4,7 @@ In the connection dialog (**GitHub verbinden**) you can explicitly bring an exis
 
 ## Discover, connect and activate
 
-1. In **Anmeldeart wählen**, choose **Bestehende Anmeldung auf diesem PC verwenden** and click **Lokale Anmeldung prüfen**. Choosing the option alone accesses no local sign-in; that click starts the check.
+1. In **Anmeldeart wählen**, choose **Bestehende Anmeldung auf diesem PC verwenden** and click **Lokale Anmeldung prüfen** (or press **Enter** on the option). Choosing the option alone accesses no local sign-in; only that button or **Enter** starts the check.
 2. Found accounts appear as one compact list, one line each: the login and its source — **GitHub CLI**, **GitHub CLI · bereits verbunden** (RepoWatch already holds a copy) or **… · nicht übernehmbar** (Git Credential Manager and unusable gh entries, not selectable). A single importable account is preselected. gh's own active-account marker is not the active RepoWatch account.
 3. One consent line names the chosen account (**Das Token von <login> wird aus der GitHub CLI übernommen und im Windows-Tresor gespeichert.**). Only the click on **Übernehmen** imports it (`connect_local_auth` with `confirmImport: true`): gh reads the selected token, RepoWatch verifies the GitHub identity and stores its own copy in the operating system's credential vault. Success closes the dialog by itself with the notice **Konto <login> verbunden.**; the account becomes active and a new one lands on the overview.
 

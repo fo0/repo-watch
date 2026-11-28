@@ -255,3 +255,26 @@ test('a gh login RepoWatch already holds is marked, and taking it over again nee
     path: testInfo.outputPath('connected-gh-feedback-360.png'),
   });
 });
+
+test('Enter on a method continues like the primary button: the local check starts, a token opens its form', async ({
+  page,
+}) => {
+  const dialog = connectDialog(page);
+  const local = dialog.getByRole('radio', {
+    name: /^Bestehende Anmeldung auf diesem PC verwenden/,
+  });
+  await local.focus();
+  await page.keyboard.press('Enter');
+  await expect(found(page).getByRole('radio')).toHaveCount(3);
+  expect(
+    (await readCalls(page)).filter((c) => c.cmd === 'discover_local_auth'),
+  ).toHaveLength(1);
+  await dialog.getByRole('button', { name: 'Zurück', exact: true }).click();
+  const token = dialog.getByRole('radio', { name: /^Mit Token verbinden/ });
+  await token.check();
+  await page.keyboard.press('Enter');
+  await expect(
+    dialog.getByRole('heading', { name: 'Mit Token verbinden' }),
+  ).toBeFocused();
+  await expect(dialog.getByLabel('GitHub-Token')).toBeVisible();
+});
